@@ -1,4 +1,5 @@
 pub mod absorb;
+pub mod cipher;
 pub mod constants;
 pub mod hasher;
 pub mod mixing;
@@ -89,10 +90,23 @@ pub fn hca<'py>(
     Ok(hasher.digest(py))
 }
 
+#[pyfunction]
+pub fn hca_cipher_process<'py>(
+    py: Python<'py>,
+    data: &[u8],
+    key: &[u8],
+    nonce: &[u8],
+) -> PyResult<Bound<'py, PyBytes>> {
+    let result = cipher::cipher_process(data, key, nonce)
+        .map_err(PyValueError::new_err)?;
+    Ok(PyBytes::new(py, &result))
+}
+
 #[pymodule]
 fn _hca_core(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyHCAHasher>()?;
     m.add_function(wrap_pyfunction!(hca, m)?)?;
+    m.add_function(wrap_pyfunction!(hca_cipher_process, m)?)?;
     Ok(())
 }
 

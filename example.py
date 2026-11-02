@@ -5,15 +5,20 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from hashium import Hashium
-from hashium.experimental.hca import HCAHasher, hca
+from hashium.experimental.hca import (
+    HCAHasher,
+    hca,
+    hca_encrypt,
+    hca_decrypt,
+)
 
 
 def main():
     hashium = Hashium()
 
-    print("=" * 60)
+    print("=" * 65)
     print("           HASHIUM CRYPTOGRAPHY TOOLKIT DEMO")
-    print("=" * 60)
+    print("=" * 65)
 
     # 1. Basic SHA-256 Hash
     print("\n1. Basic SHA-256 Hash:")
@@ -71,12 +76,12 @@ def main():
     print("   Result:", hashium.hashium_ultra_secure("mypassword"))
 
     # 10. Experimental HCA-0.2 (Hashium Custom Algorithm)
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 65)
     print("    EXPERIMENTAL: HCA-0.2 (Hashium Custom Algorithm)")
-    print("=" * 60)
+    print("=" * 65)
     print("   [!] Research prototype: Not for production security use.")
 
-    # One-shot variable output lengths
+    # 10a. One-shot variable output lengths
     data = b"Hello Hashium HCA-0.2"
     hca_256 = hca(data, output_bits=256)
     hca_512 = hca(data, output_bits=512)
@@ -84,7 +89,7 @@ def main():
     print("   256-bit Digest (hex):", hca_256.hex())
     print("   512-bit Digest (hex):", hca_512.hex())
 
-    # Streaming hasher
+    # 10b. Streaming hasher
     print("\n10b. HCA-0.2 Streaming Hasher (chunked update):")
     hasher = HCAHasher(output_bits=256)
     hasher.update(b"Hello ")
@@ -101,11 +106,26 @@ def main():
     print(f"   Forked Stream A:", hasher.hexdigest())
     print(f"   Forked Stream B:", branch_hasher.hexdigest())
 
-    print("\n" + "=" * 60)
-    print("                  ALL DEMOS COMPLETED")
-    print("=" * 60)
+    # 10c. HCA-0.2 Symmetric Stream Encryption & Decryption
+    print("\n10c. HCA-0.2 Encryption & Decryption (Stream Cipher Mode):")
+    secret_key = "MySuperSecretPasswordKey!"
+    secret_message = "Confidential message protected by native HCA-0.2 sponge cipher!"
+    print(f"   Original Plaintext: {secret_message}")
 
-    # Keep terminal open if clicked directly on Windows
+    # Encrypt
+    hca_encrypted = hca_encrypt(secret_message, secret_key)
+    print(f"   Encrypted (<nonce>:<ciphertext>): {hca_encrypted}")
+
+    # Decrypt
+    hca_decrypted = hca_decrypt(hca_encrypted, secret_key)
+    print(f"   Decrypted Plaintext: {hca_decrypted}")
+    print(f"   Successful Decryption Match: {secret_message == hca_decrypted}")
+
+    print("\n" + "=" * 65)
+    print("                  ALL DEMOS COMPLETED")
+    print("=" * 65)
+
+    # Keep console open if run interactively
     input("\nPress Enter to exit...")
 
 

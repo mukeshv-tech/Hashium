@@ -108,6 +108,29 @@ impl HCAEngine {
         squeeze(state, self.output_bytes, &self.rc)
     }
 
+    pub fn squeeze_bytes(&self, bytes: usize) -> Vec<u8> {
+        let mut state = self.state;
+        let mut block_count = self.block_count;
+
+        let rem = (self.buffer.len() + 1) % 64;
+        let k = (56 + 64 - rem) % 64;
+        let len_bits = self.total_length.wrapping_mul(8);
+
+        let mut padded = Vec::with_capacity(self.buffer.len() + 1 + k + 8);
+        padded.extend_from_slice(&self.buffer);
+        padded.push(0x01);
+        padded.resize(padded.len() + k, 0x00);
+        padded.extend_from_slice(&len_bits.to_be_bytes());
+
+        let (chunks, _) = padded.as_chunks::<64>();
+        for block in chunks {
+            absorb_block(&mut state, block, block_count, &self.rc);
+            block_count = block_count.wrapping_add(1);
+        }
+
+        squeeze(state, bytes, &self.rc)
+    }
+
     pub fn output_bits(&self) -> usize {
         self.output_bits
     }
