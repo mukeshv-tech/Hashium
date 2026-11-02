@@ -100,16 +100,42 @@ def cmd_decrypt(args):
         # Read payload piped via standard input
         payload = sys.stdin.read().strip()
     else:
-        print("Error: Provide payload string as argument/flag (-p/--payload), input file (-f), or pipe via terminal.", file=sys.stderr)
+        # Prompt interactively if not provided as argument or piped
+        try:
+            payload = input("Enter encrypted payload (<nonce>:<ciphertext>): ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nAborted.", file=sys.stderr)
+            sys.exit(1)
+
+    if not payload:
+        print("Error: Empty payload provided.", file=sys.stderr)
+        sys.exit(1)
+
+    key = args.key
+    if not key:
+        if sys.stdin.isatty():
+            import getpass
+            try:
+                key = getpass.getpass("Enter secret key: ").strip()
+            except Exception:
+                key = input("Enter secret key: ").strip()
+        else:
+            try:
+                key = input().strip()
+            except Exception:
+                pass
+
+    if not key:
+        print("Error: Secret key cannot be empty.", file=sys.stderr)
         sys.exit(1)
 
     try:
         parts = payload.split(":")
         if len(parts) == 3:  # AEAD format: nonce:tag:ciphertext
             ad = args.ad or ""
-            plaintext = hca_aead_decrypt(payload, args.key, associated_data=ad)
+            plaintext = hca_aead_decrypt(payload, key, associated_data=ad)
         elif len(parts) == 2:  # Stream format: nonce:ciphertext
-            plaintext = hca_decrypt(payload, args.key)
+            plaintext = hca_decrypt(payload, key)
         else:
             print("Error: Unrecognized payload format. Must be <nonce>:<ciphertext> or <nonce>:<tag>:<ciphertext>", file=sys.stderr)
             sys.exit(1)
@@ -158,8 +184,8 @@ def main():
 
     # Subcommand: decrypt
     p_dec = subparsers.add_parser("decrypt", help="Decrypt an HCA-0.2 encrypted payload")
-    p_dec.add_argument("payload_pos", nargs="?", help="Encrypted payload positional string (optional)")
-    p_dec.add_argument("-k", "--key", required=True, help="Secret decryption key")
+    p_dec.add_argument("payload_pos", nargs="?", help="Encrypted payload string (e.g. <nonce>:<ciphertext>)")
+    p_dec.add_argument("-k", "--key", help="Secret decryption key (will prompt if omitted)")
     p_dec.add_argument("-p", "--payload", help="Encrypted payload string (<nonce>:<ciphertext> or <nonce>:<tag>:<ciphertext>)")
     p_dec.add_argument("-f", "--file", help="Path to file containing encrypted payload")
     p_dec.add_argument("-o", "--out", help="Output file path for recovered plaintext")
