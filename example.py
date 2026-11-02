@@ -105,6 +105,9 @@ def main():
     print("                  ALL DEMOS COMPLETED")
     print("=" * 60)
 
+    # Keep terminal open if clicked directly on Windows
+    input("\nPress Enter to exit...")
+
 
 if __name__ == "__main__":
     main()
