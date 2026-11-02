@@ -23,6 +23,9 @@ dependencies = [
     "argon2-cffi"
 ]
 
+[project.scripts]
+hashium = "hashium.cli:main"
+
 [tool.maturin]
 manifest-path = "native/hca-core/Cargo.toml"
 python-packages = ["hashium"]
