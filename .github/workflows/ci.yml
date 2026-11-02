@@ -29,6 +29,8 @@ jobs:
         run: cargo clippy --manifest-path native/hca-core/Cargo.toml -- -D warnings
 
       - name: Cargo Tests
+        env:
+          RUSTFLAGS: ${{ runner.os == 'macOS' && '-C link-arg=-undefined -C link-arg=dynamic_lookup' || '' }}
         run: cargo test --manifest-path native/hca-core/Cargo.toml
 
   python-tests:
