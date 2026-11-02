@@ -10,7 +10,7 @@ Comprehensive test suite for HCA-0.1:
 """
 
 import pytest
-from hashium.experimental.hca import HCAHasher, hca
+from hashium.experimental.hca import HCAHasher, hca, hca_parallel
 from hashium.experimental.hca_reference import HCAReferenceHasher, hca_reference
 
 # Known-Answer Test vectors generated from the authoritative specification
@@ -172,3 +172,17 @@ def test_bytearray_and_memoryview_supported():
     ref = hca(raw, 256)
     assert hca(ba, 256) == ref
     assert hca(mv, 256) == ref
+
+
+def test_hca_parallel_small_and_large():
+    # Below leaf threshold (<= 16KB), parallel hash matches sequential hash
+    data_small = b"Test small payload under 16KB"
+    assert hca_parallel(data_small, 512) == hca(data_small, 512)
+
+    # Multi-chunk payload (> 256KB for 128KB chunks)
+    data_large = b"Chunked parallel verification payload..." * 8000
+    res1 = hca_parallel(data_large, 512)
+    res2 = hca_parallel(data_large, 512)
+    assert len(res1) == 64
+    assert res1 == res2
+    assert res1 != hca(data_large, 512)  # Tree hashing intentionally separates tree structure

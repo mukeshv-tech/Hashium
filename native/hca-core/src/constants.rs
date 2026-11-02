@@ -23,21 +23,48 @@ impl SplitMix64 {
     }
 }
 
-pub fn generate_constants() -> ([u64; 16], [[u64; 16]; 12]) {
-    let mut sm = SplitMix64::new(SPLITMIX64_SEED);
+pub const CONST_IV: [u64; 16] = {
+    let mut sm = SplitMix64 { x: SPLITMIX64_SEED };
     let mut iv = [0u64; 16];
-    for item in &mut iv {
-        *item = sm.next_u64();
+    let mut i = 0;
+    while i < 16 {
+        sm.x = sm.x.wrapping_add(0x9E3779B97F4A7C15);
+        let mut z = sm.x;
+        z = (z ^ (z >> 30)).wrapping_mul(0xBF58476D1CE4E5B9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94D049BB133111EB);
+        iv[i] = z ^ (z >> 31);
+        i += 1;
     }
+    iv
+};
 
+pub const CONST_RC: [[u64; 16]; 12] = {
+    let mut sm = SplitMix64 { x: SPLITMIX64_SEED };
+    // Skip 16 for IV
+    let mut i = 0;
+    while i < 16 {
+        sm.x = sm.x.wrapping_add(0x9E3779B97F4A7C15);
+        i += 1;
+    }
     let mut rc = [[0u64; 16]; 12];
-    for round in &mut rc {
-        for item in round {
-            *item = sm.next_u64();
+    let mut r = 0;
+    while r < 12 {
+        let mut j = 0;
+        while j < 16 {
+            sm.x = sm.x.wrapping_add(0x9E3779B97F4A7C15);
+            let mut z = sm.x;
+            z = (z ^ (z >> 30)).wrapping_mul(0xBF58476D1CE4E5B9);
+            z = (z ^ (z >> 27)).wrapping_mul(0x94D049BB133111EB);
+            rc[r][j] = z ^ (z >> 31);
+            j += 1;
         }
+        r += 1;
     }
+    rc
+};
 
-    (iv, rc)
+pub fn generate_constants() -> ([u64; 16], [[u64; 16]; 12]) {
+    (CONST_IV, CONST_RC)
 }
 
 #[cfg(test)]

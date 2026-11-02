@@ -11,7 +11,7 @@ import time
 import hashlib
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from hashium.experimental.hca import hca
+from hashium.experimental.hca import hca, hca_parallel
 
 
 def run_benchmark():
@@ -48,6 +48,14 @@ def run_benchmark():
         hca512_time = time.perf_counter() - start
         hca512_mb_s = (size_bytes * iterations) / (1024 * 1024) / hca512_time
         print(f"{name:<12} | {'HCA-0.2 (512b)':<15} | {hca512_time:<15.4f} | {hca512_mb_s:<18.2f}")
+
+        # HCA-Parallel (Tree Hash 512b)
+        start = time.perf_counter()
+        for _ in range(iterations):
+            _ = hca_parallel(data, output_bits=512)
+        hcapar_time = time.perf_counter() - start
+        hcapar_mb_s = (size_bytes * iterations) / (1024 * 1024) / hcapar_time
+        print(f"{name:<12} | {'HCA-Parallel':<15} | {hcapar_time:<15.4f} | {hcapar_mb_s:<18.2f}")
 
         # SHA-256
         start = time.perf_counter()

@@ -7,6 +7,7 @@ pub mod mixing;
 pub mod output;
 pub mod padding;
 pub mod state;
+pub mod tree;
 
 use hasher::HCAEngine;
 use pyo3::exceptions::{PyTypeError, PyValueError};
@@ -92,6 +93,19 @@ pub fn hca<'py>(
 }
 
 #[pyfunction]
+#[pyo3(signature = (data, output_bits=512))]
+pub fn hca_parallel<'py>(
+    py: Python<'py>,
+    data: &[u8],
+    output_bits: usize,
+) -> PyResult<Bound<'py, PyBytes>> {
+    let result = py
+        .allow_threads(|| tree::tree_hash(data, output_bits))
+        .map_err(PyValueError::new_err)?;
+    Ok(PyBytes::new(py, &result))
+}
+
+#[pyfunction]
 pub fn hca_cipher_process<'py>(
     py: Python<'py>,
     data: &[u8],
@@ -139,6 +153,7 @@ pub fn hca_aead_decrypt<'py>(
 fn _hca_core(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyHCAHasher>()?;
     m.add_function(wrap_pyfunction!(hca, m)?)?;
+    m.add_function(wrap_pyfunction!(hca_parallel, m)?)?;
     m.add_function(wrap_pyfunction!(hca_cipher_process, m)?)?;
     m.add_function(wrap_pyfunction!(hca_aead_encrypt, m)?)?;
     m.add_function(wrap_pyfunction!(hca_aead_decrypt, m)?)?;
@@ -172,5 +187,12 @@ mod tests {
         let mut tampered_cipher = cipher.clone();
         tampered_cipher[0] ^= 0x01;
         assert!(aead::aead_decrypt(&tampered_cipher, key, nonce, ad, &tag).is_err());
+    }
+
+    #[test]
+    fn test_tree_parallel() {
+        let data = vec![0x42u8; 100 * 1024];
+        let hash = tree::tree_hash(&data, 256).unwrap();
+        assert_eq!(hash.len(), 32);
     }
 }
