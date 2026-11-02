@@ -8,6 +8,8 @@ from hashium import Hashium
 from hashium.experimental.hca import (
     HCAHasher,
     hca,
+    hca_salted,
+    hca_verify_salted,
     hca_encrypt,
     hca_decrypt,
     hca_aead_encrypt,
@@ -91,7 +93,18 @@ def main():
         d = hca(msg, output_bits=bits)
         print(f"   -> {bits:4d} bits ({bits // 8:3d} bytes): {d.hex()[:32]}...{d.hex()[-16:]}")
 
-    # 10b. Streaming & Block Boundaries
+    # 10b. Salted Hashing & Verification (Rainbow Table Defense)
+    print("\n10b. HCA-0.2 Salted Hashing & Constant-Time Verification:")
+    user_pw = "MukeshSuperSecretPassword2026!"
+    stored_hash = hca_salted(user_pw, output_bits=256)
+    salt_hex, hash_hex = stored_hash.split(":")
+    print(f"   Password: {user_pw}")
+    print(f"   Generated Salt: {salt_hex} (16 bytes random)")
+    print(f"   Salted Hash:    {hash_hex[:32]}... ({len(hash_hex) * 4} bits)")
+    print(f"   Verify Match (Correct PW): {hca_verify_salted(user_pw, stored_hash, output_bits=256)}")
+    print(f"   Verify Match (Wrong PW):   {hca_verify_salted('WrongPassword', stored_hash, output_bits=256)}")
+
+    # 10c. Streaming & Block Boundaries
     print("\n10b. HCA-0.2 Input Length Progression (0 Bytes -> 100,000 Bytes):")
     large_steps = [0, 64, 512, 4096, 65536, 100000]
     for size in large_steps:

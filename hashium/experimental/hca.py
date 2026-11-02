@@ -31,6 +31,64 @@ def hca(data: Union[bytes, bytearray, memoryview], output_bits: int = 512) -> by
     return _hca_core.hca(data, output_bits)
 
 
+def hca_salted(
+    data: Union[str, bytes],
+    salt: Optional[Union[str, bytes]] = None,
+    output_bits: int = 512,
+    salt_bytes_len: int = 16,
+) -> str:
+    """
+    Compute a salted HCA-0.2 hash.
+
+    Format: '<salt_hex>:<hash_hex>'
+
+    Parameters:
+        data: Plaintext password or data string/bytes.
+        salt: Optional specific salt. If None, a cryptographically secure random salt is generated.
+        output_bits: Output bit length (128 to 4096, default 512).
+        salt_bytes_len: Length of random salt in bytes (default 16).
+
+    Returns:
+        Formatted string: '<salt_hex>:<hash_hex>'
+    """
+    data_bytes = data.encode("utf-8") if isinstance(data, str) else bytes(data)
+
+    if salt is None:
+        salt_b = os.urandom(salt_bytes_len)
+    elif isinstance(salt, str):
+        salt_b = bytes.fromhex(salt) if len(salt) % 2 == 0 and all(c in "0123456789abcdefABCDEF" for c in salt) else salt.encode("utf-8")
+    else:
+        salt_b = bytes(salt)
+
+    # Domain-separated salted absorption: "HCASALT:" || salt || ":" || data
+    salted_input = b"HCASALT:" + salt_b + b":" + data_bytes
+    digest = _hca_core.hca(salted_input, output_bits)
+    return f"{salt_b.hex()}:{digest.hex()}"
+
+
+def hca_verify_salted(
+    data: Union[str, bytes],
+    stored_salted_hash: str,
+    output_bits: int = 512,
+) -> bool:
+    """
+    Verify a plaintext data against a stored salted HCA-0.2 hash string (<salt_hex>:<hash_hex>).
+
+    Uses constant-time comparison to prevent timing attacks.
+    """
+    import hmac
+
+    parts = stored_salted_hash.split(":")
+    if len(parts) != 2:
+        return False
+
+    salt_hex, expected_hash_hex = parts[0], parts[1]
+    calculated = hca_salted(data, salt=salt_hex, output_bits=output_bits)
+    _, calculated_hash_hex = calculated.split(":")
+
+    return hmac.compare_digest(expected_hash_hex, calculated_hash_hex)
+
+
 def hca_encrypt(data: Union[str, bytes], key: Union[str, bytes], nonce: Optional[bytes] = None) -> str:
     """
     Encrypt data using HCA-0.2 as a symmetric stream cipher keystream generator.
@@ -157,6 +215,8 @@ def hca_aead_decrypt(
 __all__ = [
     "HCAHasher",
     "hca",
+    "hca_salted",
+    "hca_verify_salted",
     "hca_encrypt",
     "hca_decrypt",
     "hca_aead_encrypt",

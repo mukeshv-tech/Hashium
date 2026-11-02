@@ -19,6 +19,8 @@ from hashium.core import Hashium
 from hashium.experimental.hca import (
     hca,
     HCAHasher,
+    hca_salted,
+    hca_verify_salted,
     hca_encrypt,
     hca_decrypt,
     hca_aead_encrypt,
@@ -45,11 +47,16 @@ def cmd_hash(args):
             sys.exit(1)
 
     if args.algo == "hca":
-        digest = hca(data, output_bits=args.bits)
-        print(digest.hex())
+        if args.salted:
+            print(hca_salted(data, output_bits=args.bits))
+        else:
+            digest = hca(data, output_bits=args.bits)
+            print(digest.hex())
     elif args.algo == "sha256":
         h = Hashium()
-        if args.file:
+        if args.salted:
+            print(h.hashium_salted(data.decode("utf-8", errors="replace")))
+        elif args.file:
             print(h.hash_file(args.file))
         else:
             import hashlib
@@ -170,6 +177,7 @@ def main():
     p_hash.add_argument("-f", "--file", help="File path to hash")
     p_hash.add_argument("-a", "--algo", choices=["hca", "sha256"], default="hca", help="Algorithm (default: hca)")
     p_hash.add_argument("-b", "--bits", type=int, default=256, help="Output bit length for HCA (128-4096, default: 256)")
+    p_hash.add_argument("-s", "--salted", action="store_true", help="Generate a secure salted hash (<salt>:<hash>)")
     p_hash.set_defaults(func=cmd_hash)
 
     # Subcommand: encrypt
