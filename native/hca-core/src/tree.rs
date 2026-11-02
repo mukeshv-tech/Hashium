@@ -1,7 +1,7 @@
 use crate::hasher::HCAEngine;
 use rayon::prelude::*;
 
-const LEAF_CHUNK_SIZE: usize = 16 * 1024; // 16 KB chunks for optimal L1/L2 cache utilization
+const LEAF_CHUNK_SIZE: usize = 64 * 1024; // 16 KB chunks for optimal L1/L2 cache utilization
 const TREE_DOMAIN: &[u8] = b"HCATREE:";
 
 /// Compute high-throughput parallel tree hash of large byte slices using all CPU cores.

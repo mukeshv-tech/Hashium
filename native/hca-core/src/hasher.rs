@@ -64,12 +64,12 @@ impl HCAEngine {
             }
         }
 
-        while data_slice.len() >= 64 {
-            let block: &[u8; 64] = data_slice[..64].try_into().unwrap();
+        let (chunks, remainder) = data_slice.as_chunks::<64>();
+        for block in chunks {
             absorb_block(&mut self.state, block, self.block_count, &self.rc);
             self.block_count = self.block_count.wrapping_add(1);
-            data_slice = &data_slice[64..];
         }
+        data_slice = remainder;
 
         if !data_slice.is_empty() {
             self.buffer.extend_from_slice(data_slice);

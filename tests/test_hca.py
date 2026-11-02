@@ -179,8 +179,8 @@ def test_hca_parallel_small_and_large():
     data_small = b"Test small payload under 16KB"
     assert hca_parallel(data_small, 512) == hca(data_small, 512)
 
-    # Multi-chunk payload (> 16KB)
-    data_large = b"Chunked parallel verification payload..." * 1000
+    # Multi-chunk payload (> 128KB for 64KB chunks)
+    data_large = b"Chunked parallel verification payload..." * 4000
     res1 = hca_parallel(data_large, 512)
     res2 = hca_parallel(data_large, 512)
     assert len(res1) == 64
