@@ -16,9 +16,9 @@ from hashium.experimental.hca import (
 def main():
     hashium = Hashium()
 
-    print("=" * 65)
-    print("           HASHIUM CRYPTOGRAPHY TOOLKIT DEMO")
-    print("=" * 65)
+    print("=" * 70)
+    print("             HASHIUM CRYPTOGRAPHY TOOLKIT DEMO")
+    print("=" * 70)
 
     # 1. Basic SHA-256 Hash
     print("\n1. Basic SHA-256 Hash:")
@@ -76,54 +76,61 @@ def main():
     print("   Result:", hashium.hashium_ultra_secure("mypassword"))
 
     # 10. Experimental HCA-0.2 (Hashium Custom Algorithm)
-    print("\n" + "=" * 65)
-    print("    EXPERIMENTAL: HCA-0.2 (Hashium Custom Algorithm)")
-    print("=" * 65)
+    print("\n" + "=" * 70)
+    print("      EXPERIMENTAL: HCA-0.2 (Hashium Custom Algorithm)")
+    print("=" * 70)
     print("   [!] Research prototype: Not for production security use.")
 
-    # 10a. One-shot variable output lengths
-    data = b"Hello Hashium HCA-0.2"
-    hca_256 = hca(data, output_bits=256)
-    hca_512 = hca(data, output_bits=512)
-    print(f"\n10a. HCA-0.2 One-Shot Digest (Input: {data!r}):")
-    print("   256-bit Digest (hex):", hca_256.hex())
-    print("   512-bit Digest (hex):", hca_512.hex())
+    # 10a. Step-by-Step Output Bit Progression (Variable Digest Lengths)
+    print("\n10a. HCA-0.2 Variable Output Length (Increasing Step-by-Step):")
+    msg = b"Hashium variable output demonstrator"
+    bit_steps = [128, 192, 256, 384, 512, 1024, 2048]
+    for bits in bit_steps:
+        digest = hca(msg, output_bits=bits)
+        hex_preview = digest.hex()[:32] + "..." + digest.hex()[-16:] if len(digest.hex()) > 48 else digest.hex()
+        print(f"   -> {bits:4d} bits ({bits // 8:3d} bytes): {hex_preview}")
 
-    # 10b. Streaming hasher
-    print("\n10b. HCA-0.2 Streaming Hasher (chunked update):")
+    # 10b. Step-by-Step Message Length Progression (Boundary & Size Scaling)
+    print("\n10b. HCA-0.2 Input Length Progression (Across 64-byte Block Boundaries):")
+    byte_steps = [0, 1, 16, 55, 56, 63, 64, 65, 127, 128, 129, 256, 1024]
+    for size in byte_steps:
+        sample_input = b"X" * size
+        d = hca(sample_input, output_bits=256)
+        blocks = (size + 1 + 8 + 63) // 64
+        print(f"   -> Input: {size:4d} bytes | Absorption Blocks: {blocks:2d} | Digest: {d.hex()[:32]}...")
+
+    # 10c. Incremental Streaming Hasher
+    print("\n10c. HCA-0.2 Streaming Hasher (chunked update):")
     hasher = HCAHasher(output_bits=256)
-    hasher.update(b"Hello ")
-    hasher.update(b"Hashium ")
-    hasher.update(b"HCA-0.2")
-    stream_digest = hasher.hexdigest()
-    print("   Streamed Result (hex):", stream_digest)
-    print("   Matches One-Shot:", stream_digest == hca_256.hex())
+    chunks = [b"Hello ", b"Hashium ", b"HCA-0.2 ", b"Incremental ", b"Stream!"]
+    cumulative = b""
+    for idx, chunk in enumerate(chunks, 1):
+        hasher.update(chunk)
+        cumulative += chunk
+        current_digest = hasher.hexdigest()
+        print(f"   Step {idx}: +{len(chunk)} bytes (Total: {len(cumulative):2d} B) -> {current_digest[:32]}...")
 
-    # Hasher copy and branch
-    branch_hasher = hasher.copy()
-    hasher.update(b" [Stream A]")
-    branch_hasher.update(b" [Stream B]")
-    print(f"   Forked Stream A:", hasher.hexdigest())
-    print(f"   Forked Stream B:", branch_hasher.hexdigest())
+    # 10d. Step-by-Step Payload Encryption & Decryption
+    print("\n10d. HCA-0.2 Stream Cipher Encryption (Payload Scaling Step-by-Step):")
+    key = "MySecureKey-2026"
+    test_messages = [
+        "Hi",                                              # 2 bytes
+        "Short secret phrase",                             # 19 bytes
+        "Medium length message designed for cipher demo",  # 46 bytes
+        "A" * 64,                                          # Exactly 64 bytes (1 block)
+        "Large secret payload: " + ("0123456789ABCDEF" * 8) # 150 bytes
+    ]
 
-    # 10c. HCA-0.2 Symmetric Stream Encryption & Decryption
-    print("\n10c. HCA-0.2 Encryption & Decryption (Stream Cipher Mode):")
-    secret_key = "MySuperSecretPasswordKey!"
-    secret_message = "Confidential message protected by native HCA-0.2 sponge cipher!"
-    print(f"   Original Plaintext: {secret_message}")
+    for item in test_messages:
+        item_bytes_len = len(item.encode("utf-8"))
+        encrypted = hca_encrypt(item, key)
+        decrypted = hca_decrypt(encrypted, key)
+        nonce_hex, cipher_hex = encrypted.split(":")
+        print(f"   -> Size: {item_bytes_len:3d} B | Ciphertext: {cipher_hex[:24]}... | Decrypted Match: {decrypted == item}")
 
-    # Encrypt
-    hca_encrypted = hca_encrypt(secret_message, secret_key)
-    print(f"   Encrypted (<nonce>:<ciphertext>): {hca_encrypted}")
-
-    # Decrypt
-    hca_decrypted = hca_decrypt(hca_encrypted, secret_key)
-    print(f"   Decrypted Plaintext: {hca_decrypted}")
-    print(f"   Successful Decryption Match: {secret_message == hca_decrypted}")
-
-    print("\n" + "=" * 65)
-    print("                  ALL DEMOS COMPLETED")
-    print("=" * 65)
+    print("\n" + "=" * 70)
+    print("                     ALL DEMOS COMPLETED")
+    print("=" * 70)
 
     # Keep console open if run interactively
     input("\nPress Enter to exit...")
