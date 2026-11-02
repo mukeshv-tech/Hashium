@@ -295,26 +295,26 @@ def build_whitepaper_pdf(output_path: str):
             "2. Historical Background & The Sponge Paradigm",
             "Evolution from Compression Functions to Stateful Permutations",
             """
-            To appreciate HCA's construction, one must review the classical Merkle-Damgård paradigm formalized in 1979. In a Merkle-Damgård construction, an arbitrary-length message is split into fixed-size blocks and sequentially processed by a compression function $f: \{0,1\}^n \times \{0,1\}^b \to \{0,1\}^n$. 
-            While Merkle and Damgård proved that collision resistance of $f$ implies collision resistance of the entire hash function, the construction suffers from structural vulnerabilities:
-            - Length Extension Attacks: Given $H(m)$ and the length of $m$, an adversary can compute $H(m \,\|\, \text{pad} \,\|\, m')$ without knowing $m$. This completely invalidates naive keyed MAC constructions $H(k \,\|\, m)$.
-            - Multi-Collision Vulnerability: Joux demonstrated that finding $2^k$ collisions in an iterated Merkle-Damgård function requires only $k \times 2^{n/2}$ work, far below the ideal random oracle bound.
+            To appreciate HCA's construction, one must review the classical Merkle-Damgård paradigm formalized in 1979. In a Merkle-Damgård construction, an arbitrary-length message is split into fixed-size blocks and sequentially processed by a compression function <i>f: 0,1<sup>n</sup>  &times;  0,1<sup>b</sup>  &rarr;  0,1<sup>n</sup></i>. 
+            While Merkle and Damgård proved that collision resistance of <i>f</i> implies collision resistance of the entire hash function, the construction suffers from structural vulnerabilities:
+            - Length Extension Attacks: Given <i>H(m)</i> and the length of <i>m</i>, an adversary can compute <i>H(m  ||  pad  ||  m')</i> without knowing <i>m</i>. This completely invalidates naive keyed MAC constructions <i>H(k  ||  m)</i>.
+            - Multi-Collision Vulnerability: Joux demonstrated that finding <i>2<sup>k</sup></i> collisions in an iterated Merkle-Damgård function requires only <i>k  &times;  2<sup>n/2</sup></i> work, far below the ideal random oracle bound.
             
-            In 2007, Guido Bertoni, Joan Daemen, Michaël Peeters, and Gilles Van Assche introduced the cryptographic sponge construction. A sponge operates on a fixed state of $b = r + c$ bits, where $r$ denotes the absorption rate and $c$ denotes the capacity. 
+            In 2007, Guido Bertoni, Joan Daemen, Michaël Peeters, and Gilles Van Assche introduced the cryptographic sponge construction. A sponge operates on a fixed state of <i>b = r + c</i> bits, where <i>r</i> denotes the absorption rate and <i>c</i> denotes the capacity. 
             The sponge processes messages in two alternating phases:
-            1. Absorbing Phase: Input blocks of $r$ bits are XORed into the first $r$ bits of the state, followed by the application of an unkeyed permutation $P: \{0,1\}^b \to \{0,1\}^b$.
-            2. Squeezing Phase: Output blocks of $r$ bits are extracted from the state, interleaved with applications of $P$, until the desired output digest length is reached.
+            1. Absorbing Phase: Input blocks of <i>r</i> bits are XORed into the first <i>r</i> bits of the state, followed by the application of an unkeyed permutation <i>P: 0,1<sup>b</sup>  &rarr;  0,1<sup>b</sup></i>.
+            2. Squeezing Phase: Output blocks of <i>r</i> bits are extracted from the state, interleaved with applications of <i>P</i>, until the desired output digest length is reached.
             
-            The foundational theorem of sponge functions states that any attack against a sponge with an ideal permutation $P$ requires work proportional to $2^{c/2}$, establishing that the capacity $c$ completely determines the security floor against state-recovery, collision, and length-extension attacks.
+            The foundational theorem of sponge functions states that any attack against a sponge with an ideal permutation <i>P</i> requires work proportional to <i>2<sup>c/2</sup></i>, establishing that the capacity <i>c</i> completely determines the security floor against state-recovery, collision, and length-extension attacks.
             """,
             """
             HCA Parameter Selection:
-            - Total State Width ($b$): 1024 bits (128 bytes).
-            - Absorption Rate ($r$): 512 bits (64 bytes).
-            - Structural Capacity ($c$): 512 bits (64 bytes).
-            - Rate-to-Capacity Ratio ($r/c$): 1.0.
+            - Total State Width (<i>b</i>): 1024 bits (128 bytes).
+            - Absorption Rate (<i>r</i>): 512 bits (64 bytes).
+            - Structural Capacity (<i>c</i>): 512 bits (64 bytes).
+            - Rate-to-Capacity Ratio (<i>r/c</i>): 1.0.
             
-            This 512-bit capacity ensures that an attacker must expend at least $2^{256}$ operations to identify internal state collisions or mount slide attacks. Unlike SHA-256 (which maintains only a 256-bit internal state), HCA is fundamentally immune to length-extension attacks by design.
+            This 512-bit capacity ensures that an attacker must expend at least <i>2<sup>256</sup></i> operations to identify internal state collisions or mount slide attacks. Unlike SHA-256 (which maintains only a 256-bit internal state), HCA is fundamentally immune to length-extension attacks by design.
             """
         ),
         # PAGE 5
@@ -322,19 +322,19 @@ def build_whitepaper_pdf(output_path: str):
             "3. Mathematical Architecture & State Anatomy",
             "1024-Bit Word Partitioning and Register Layout",
             """
-            The internal state of HCA is formally denoted as $\mathcal{S} \in (\mathbb{Z}_{2^{64}})^{16}$. The 1024 bits of continuous cryptographic state are represented as an array of sixteen 64-bit unsigned integers:
-            $$\mathcal{S} = [s_0, s_1, s_2, s_3, s_4, s_5, s_6, s_7, s_8, s_9, s_{10}, s_{11}, s_{12}, s_{13}, s_{14}, s_{15}]$$
+            The internal state of HCA is formally denoted as <i><b>S</b>  &isin;  (<b>Z</b><sub>2<sup>64</sup></sub>)<sup>16</sup></i>. The 1024 bits of continuous cryptographic state are represented as an array of sixteen 64-bit unsigned integers:
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>S</b> = [s<sub>0</sub>, s<sub>1</sub>, s<sub>2</sub>, s<sub>3</sub>, s<sub>4</sub>, s<sub>5</sub>, s<sub>6</sub>, s<sub>7</sub>, s<sub>8</sub>, s<sub>9</sub>, s<sub>10</sub>, s<sub>11</sub>, s<sub>12</sub>, s<sub>13</sub>, s<sub>14</sub>, s<sub>15</sub>]</font><br/>
             
             This internal vector is divided into two distinct logical partitions:
-            1. The Absorption Rate Words ($s_0 \dots s_7$):
-               Totaling $8 \times 64 = 512$ bits (64 bytes). During message absorption, 64-byte message blocks are decoded as 8 big-endian 64-bit words and XORed directly into this region.
-            2. The Capacity Words ($s_8 \dots s_{15}$):
-               Totaling $8 \times 64 = 512$ bits (64 bytes). This region is isolated from direct message XOR injection. Instead, it serves as the state's security core and domain-separation substrate.
+            1. The Absorption Rate Words (<i>s<sub>0</sub> dots s<sub>7</sub></i>):
+               Totaling <i>8  &times;  64 = 512</i> bits (64 bytes). During message absorption, 64-byte message blocks are decoded as 8 big-endian 64-bit words and XORed directly into this region.
+            2. The Capacity Words (<i>s<sub>8</sub> dots s<sub>15</sub></i>):
+               Totaling <i>8  &times;  64 = 512</i> bits (64 bytes). This region is isolated from direct message XOR injection. Instead, it serves as the state's security core and domain-separation substrate.
                
-            Specifically, capacity word $s_8$ is designated as the Monotonic Block Counter, updated at every block $j$ via:
-            $$s_8 \leftarrow s_8 \oplus j$$
-            Capacity word $s_9$ serves as the Domain Separation Channel, XORed with functional domain tags to ensure strict mathematical orthogonality between hashing, streaming ciphering, and tree reduction.
-            Words $s_{10} \dots s_{15}$ remain pure entropy reservoirs, propagating non-linear diffusion across mixing rounds.
+            Specifically, capacity word <i>s<sub>8</sub></i> is designated as the Monotonic Block Counter, updated at every block <i>j</i> via:
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;s<sub>8</sub>  &le; ftarrow s<sub>8</sub>  &oplus;  j</font><br/>
+            Capacity word <i>s<sub>9</sub></i> serves as the Domain Separation Channel, XORed with functional domain tags to ensure strict mathematical orthogonality between hashing, streaming ciphering, and tree reduction.
+            Words <i>s<sub>10</sub> dots s<sub>15</sub></i> remain pure entropy reservoirs, propagating non-linear diffusion across mixing rounds.
             """,
             """
             Bit-Level Memory Representation:
@@ -359,18 +359,18 @@ def build_whitepaper_pdf(output_path: str):
             To eliminate any suspicion of backdoors or subverted constants (often termed 'Nothing-Up-My-Sleeve' numbers), HCA derives all structural Initial Vectors and Round Constants via an unkeyed, deterministic SplitMix64 pseudorandom generator initialized with a publicly auditable seed.
             
             The seed value is defined as the 64-bit big-endian integer corresponding to the ASCII string <code>"HCA-v01\\0"</code>:
-            $$\text{SEED} = \mathtt{0x4843412D76303100}$$
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;SEED = <code>0x4843412D76303100</code></font><br/>
             
-            SplitMix64 is an optimal 64-bit splittable generator developed by Guy Steele and Sebastiano Vigna. It possesses an exact period of $2^{64}$, passes the full BigCrush statistical test suite, and exhibits excellent linear complexity:
-            $$x_{n+1} = x_n + \mathtt{0x9E3779B97F4A7C15} \pmod{2^{64}}$$
-            $$z = (x_{n+1} \oplus (x_{n+1} \gg 30)) \times \mathtt{0xBF58476D1CE4E5B9} \pmod{2^{64}}$$
-            $$z = (z \oplus (z \gg 27)) \times \mathtt{0x94D049BB133111EB} \pmod{2^{64}}$$
-            $$\text{Output} = z \oplus (z \gg 31)$$
+            SplitMix64 is an optimal 64-bit splittable generator developed by Guy Steele and Sebastiano Vigna. It possesses an exact period of <i>2<sup>64</sup></i>, passes the full BigCrush statistical test suite, and exhibits excellent linear complexity:
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;x<sub>n+1</sub> = x<sub>n</sub> + <code>0x9E3779B97F4A7C15</code>  mod 2<sup>64</sup></font><br/>
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;z = (x<sub>n+1</sub>  &oplus;  (x<sub>n+1</sub>  &Gt;  30))  &times;  <code>0xBF58476D1CE4E5B9</code>  mod 2<sup>64</sup></font><br/>
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;z = (z  &oplus;  (z  &Gt;  27))  &times;  <code>0x94D049BB133111EB</code>  mod 2<sup>64</sup></font><br/>
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;Output = z  &oplus;  (z  &Gt;  31)</font><br/>
             
             Sequence Generation Protocol:
             1. The first 16 generated 64-bit words instantiate the Initial Vector:
-               $$\mathbf{IV} = [s_{0}^{\text{init}}, s_{1}^{\text{init}}, \dots, s_{15}^{\text{init}}] \in (\mathbb{Z}_{2^{64}})^{16}$$
-            2. The subsequent 192 generated 64-bit words populate the round constant matrix $\mathbf{RC}[r][i]$ across all 12 rounds ($r \in [0, 11]$) and all 16 state words ($i \in [0, 15]$).
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>IV</b> = [s<sub>0</sub><sup>init</sup>, s<sub>1</sub><sup>init</sup>, dots, s<sub>15</sub><sup>init</sup>]  &isin;  (<b>Z</b><sub>2<sup>64</sup></sub>)<sup>16</sup></font><br/>
+            2. The subsequent 192 generated 64-bit words populate the round constant matrix <i><b>RC</b>[r][i]</i> across all 12 rounds (<i>r  &isin;  [0, 11]</i>) and all 16 state words (<i>i  &isin;  [0, 15]</i>).
             """,
             """
             Compile-Time Const Optimization:
@@ -385,25 +385,25 @@ def build_whitepaper_pdf(output_path: str):
             "5. Intra-Round Mixing Transformation (ARX Pipeline)",
             "Addition, Rotation, and XOR Logic per State Word",
             """
-            The non-linear engine of HCA is the 12-round mixing permutation $\mathcal{M}: (\mathbb{Z}_{2^{64}})^{16} \to (\mathbb{Z}_{2^{64}})^{16}$. Within each round $r \in [0, 11]$, all 16 state words are transformed concurrently through an unrolled ARX (Addition-Rotation-XOR) sequence.
+            The non-linear engine of HCA is the 12-round mixing permutation <i><b>M</b>: (<b>Z</b><sub>2<sup>64</sup></sub>)<sup>16</sup>  &rarr;  (<b>Z</b><sub>2<sup>64</sup></sub>)<sup>16</sup></i>. Within each round <i>r  &isin;  [0, 11]</i>, all 16 state words are transformed concurrently through an unrolled ARX (Addition-Rotation-XOR) sequence.
             
             ARX architectures form the bedrock of many high-performance ciphers (e.g., ChaCha20, BLAKE2, BLAKE3). Their primary advantages are twofold:
             - Micro-Architectural Efficiency: Modular addition (+), bitwise XOR (^), and cyclic rotations (<<<) execute in single CPU cycles on modern execution units with minimal pipeline stalls.
             - Absence of Memory S-Boxes: By avoiding table lookups (such as the AES S-box), ARX constructions are fundamentally immune to cache-timing side-channel attacks.
             
-            Algorithmic Steps for Word $i \in [0, 15]$ in Round $r$:
-            1. Adjacent Word Non-Linear Coupling ($a_i$):
-               $$s_{\text{next}} = \mathcal{S}[(i + 1) \bmod 16]$$
-               $$a_i = \mathcal{S}[i] + \left( (s_{\text{next}} \oplus \mathbf{RC}[r][i]) \lll 13 \right) \pmod{2^{64}}$$
-               Here, circular rotation by 13 bits breaks word symmetries while XOR with round constant $\mathbf{RC}[r][i]$ destroys algebraic affine invariants.
-            2. Distant Word Summation & Dynamic Rotation ($b_i$):
-               $$s_{\text{sum}} = \mathcal{S}[(i + 4) \bmod 16] + \mathcal{S}[(i + 11) \bmod 16] \pmod{2^{64}}$$
-               $$\text{rot}_b = (7i + 3r) \bmod 64$$
-               $$b_i = s_{\text{sum}} \lll \text{rot}_b$$
-               The rotation distance $\text{rot}_b$ varies dynamically as a function of both word position $i$ and round index $r$, ensuring variable bit-slice displacement.
-            3. Non-Linear Fusion & Secondary Dynamic Rotation ($t_i$):
-               $$\text{rot}_t = (11i + 7r + 1) \bmod 64$$
-               $$t_i = (a_i \oplus b_i) \lll \text{rot}_t$$
+            Algorithmic Steps for Word <i>i  &isin;  [0, 15]</i> in Round <i>r</i>:
+            1. Adjacent Word Non-Linear Coupling (<i>a<sub>i</sub></i>):
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;s<sub>next</sub> = <b>S</b>[(i + 1)  mod  16]</font><br/>
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;a<sub>i</sub> = <b>S</b>[i] +  &le; ft( (s<sub>next</sub>  &oplus;  <b>RC</b>[r][i])  &Lt; l 13 right)  mod 2<sup>64</sup></font><br/>
+               Here, circular rotation by 13 bits breaks word symmetries while XOR with round constant <i><b>RC</b>[r][i]</i> destroys algebraic affine invariants.
+            2. Distant Word Summation & Dynamic Rotation (<i>b<sub>i</sub></i>):
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;s<sub>sum</sub> = <b>S</b>[(i + 4)  mod  16] + <b>S</b>[(i + 11)  mod  16]  mod 2<sup>64</sup></font><br/>
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;rot<sub>b</sub> = (7i + 3r)  mod  64</font><br/>
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;b<sub>i</sub> = s<sub>sum</sub>  &Lt; l rot<sub>b</sub></font><br/>
+               The rotation distance <i>rot<sub>b</sub></i> varies dynamically as a function of both word position <i>i</i> and round index <i>r</i>, ensuring variable bit-slice displacement.
+            3. Non-Linear Fusion & Secondary Dynamic Rotation (<i>t<sub>i</sub></i>):
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;rot<sub>t</sub> = (11i + 7r + 1)  mod  64</font><br/>
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;t<sub>i</sub> = (a<sub>i</sub>  &oplus;  b<sub>i</sub>)  &Lt; l rot<sub>t</sub></font><br/>
             """,
             """
             Algebraic Properties of Intra-Round Mixing:
@@ -418,24 +418,24 @@ def build_whitepaper_pdf(output_path: str):
             """
             While intra-round ARX mixing achieves vigorous non-linear diffusion within local word neighborhoods, complete cryptographic security requires that every word's entropy disperses across all 16 state registers as rapidly as possible.
             
-            In classic block ciphers like the Advanced Encryption Standard (AES), this is achieved via ShiftRows and MixColumns. In HCA, global diffusion is achieved through an analytical affine permutation map $\pi_r: [0, 15] \to [0, 15]$ applied at the conclusion of each round $r$.
+            In classic block ciphers like the Advanced Encryption Standard (AES), this is achieved via ShiftRows and MixColumns. In HCA, global diffusion is achieved through an analytical affine permutation map <i>&pi;<sub>r</sub>: [0, 15]  &rarr;  [0, 15]</i> applied at the conclusion of each round <i>r</i>.
             
             Mathematical Formulation:
-            At the end of round $r$, the intermediate transformed words $t_0 \dots t_{15}$ are mapped into the new round state $\mathcal{S}_{\text{new}}$ according to:
-            $$\pi_r(i) = (5 \cdot i + r) \bmod 16$$
-            $$\mathcal{S}_{\text{new}}[i] = t_{\pi_r(i)}$$
+            At the end of round <i>r</i>, the intermediate transformed words <i>t<sub>0</sub> dots t<sub>15</sub></i> are mapped into the new round state <i><b>S</b><sub>new</sub></i> according to:
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;&pi;<sub>r</sub>(i) = (5  &middot;  i + r)  mod  16</font><br/>
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>S</b><sub>new</sub>[i] = t<sub>&pi;<sub>r</sub>(i)</sub></font><br/>
             
             Theorem 1 (Bijectivity of Permutation Map):
-            For every round $r \in [0, 11]$, the map $\pi_r(i)$ is a true bijection on the set of indices $\mathbb{Z}_{16} = \{0, 1, \dots, 15\}$.
+            For every round <i>r  &isin;  [0, 11]</i>, the map <i>&pi;<sub>r</sub>(i)</i> is a true bijection on the set of indices <i><b>Z</b><sub>16</sub> = 0, 1, dots, 15</i>.
             
             Proof:
-            Let $i_1, i_2 \in \mathbb{Z}_{16}$ such that $\pi_r(i_1) = \pi_r(i_2)$. Then:
-            $$5 i_1 + r \equiv 5 i_2 + r \pmod{16}$$
-            Subtracting $r$ from both sides yields:
-            $$5 i_1 \equiv 5 i_2 \pmod{16}$$
-            Since $\gcd(5, 16) = 1$, 5 has a unique multiplicative inverse modulo 16. Specifically, $5 \times 13 = 65 \equiv 1 \pmod{16}$. Multiplying both sides by 13 gives:
-            $$i_1 \equiv i_2 \pmod{16}$$
-            Therefore, $\pi_r$ is injective. Since $\mathbb{Z}_{16}$ is finite, injectivity implies bijectivity. No state words are dropped or duplicated.
+            Let <i>i<sub>1</sub>, i<sub>2</sub>  &isin;  <b>Z</b><sub>16</sub></i> such that <i>&pi;<sub>r</sub>(i<sub>1</sub>) = &pi;<sub>r</sub>(i<sub>2</sub>)</i>. Then:
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;5 i<sub>1</sub> + r  &equiv;  5 i<sub>2</sub> + r  mod 16</font><br/>
+            Subtracting <i>r</i> from both sides yields:
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;5 i<sub>1</sub>  &equiv;  5 i<sub>2</sub>  mod 16</font><br/>
+            Since <i>gcd(5, 16) = 1</i>, 5 has a unique multiplicative inverse modulo 16. Specifically, <i>5  &times;  13 = 65  &equiv;  1  mod 16</i>. Multiplying both sides by 13 gives:
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;i<sub>1</sub>  &equiv;  i<sub>2</sub>  mod 16</font><br/>
+            Therefore, <i>&pi;<sub>r</sub></i> is injective. Since <i><b>Z</b><sub>16</sub></i> is finite, injectivity implies bijectivity. No state words are dropped or duplicated.
             """,
             """
             Optimal Coprime Stepping:
@@ -446,7 +446,7 @@ def build_whitepaper_pdf(output_path: str):
             - Index 2 -> 10 + r
             - Index 3 -> 15 + r
             - Index 4 -> 4 + r
-            This guarantees that adjacent words in round $r$ become separated by at least 5 words in round $r+1$, preventing localized differential clusters.
+            This guarantees that adjacent words in round <i>r</i> become separated by at least 5 words in round <i>r+1</i>, preventing localized differential clusters.
             """
         ),
         # PAGE 9
@@ -456,21 +456,21 @@ def build_whitepaper_pdf(output_path: str):
             """
             A fundamental requirement for any cryptographic permutation is the Strict Avalanche Criterion (SAC), first articulated by Webster and Tavares in 1985. A function satisfies SAC if, whenever a single input bit is complemented, each of the output bits changes with a probability of exactly 0.5.
             
-            To verify the avalanche characteristics of HCA's 12-round mixing permutation $\mathcal{M}(\mathcal{S})$, empirical differential simulations were conducted across $10^6$ randomized state pairs differing by a Hamming weight of exactly 1 bit ($\Delta_{\text{in}} = 1$).
+            To verify the avalanche characteristics of HCA's 12-round mixing permutation <i><b>M</b>(<b>S</b>)</i>, empirical differential simulations were conducted across <i>10<sup>6</sup></i> randomized state pairs differing by a Hamming weight of exactly 1 bit (<i>&Delta;<sub>in</sub> = 1</i>).
             
             Avalanche Progression by Round:
-            - Round 1: $\Delta_{\text{in}} = 1$ expands to an average of 4.2 affected words and 28.6 flipped bits. Local ARX addition carries propagate across adjacent registers.
-            - Round 2: Word permutation $\pi_1$ scatters perturbed words across the full 1024-bit boundary. Average flipped bits: 214.3 bits (~20.9% diffusion).
+            - Round 1: <i>&Delta;<sub>in</sub> = 1</i> expands to an average of 4.2 affected words and 28.6 flipped bits. Local ARX addition carries propagate across adjacent registers.
+            - Round 2: Word permutation <i>&pi;<sub>1</sub></i> scatters perturbed words across the full 1024-bit boundary. Average flipped bits: 214.3 bits (~20.9% diffusion).
             - Round 3: All 16 words are perturbed. Average flipped bits: 498.7 bits (~48.7% diffusion). SAC is asymptotically satisfied.
-            - Rounds 4..12: Full state saturation. The mean bit-flip probability stabilizes at $\mu = 0.50002$ with standard deviation $\sigma = 0.0156$, matching the theoretical distribution of a perfect random permutation.
+            - Rounds 4..12: Full state saturation. The mean bit-flip probability stabilizes at <i>&mu; = 0.50002</i> with standard deviation <i>&sigma; = 0.0156</i>, matching the theoretical distribution of a perfect random permutation.
             """,
             """
             Security Margin Assessment:
             With complete bit saturation achieved within 3 to 4 rounds, HCA's 12-round specification provides an 8-round security margin. 
             This buffer is designed to resist:
             1. Higher-order differential cryptanalysis: Exponential branch growth prevents construction of distinguishing differentials past round 6.
-            2. Linear approximations: Matsui linear hull correlations diminish below $2^{-512}$ across 12 rounds.
-            3. Algebraic degree saturation: The algebraic normal form (ANF) degree of the 1024 state bits reaches maximum algebraic complexity ($d = 1023$) well before round 8.
+            2. Linear approximations: Matsui linear hull correlations diminish below <i>2<sup>-512</sup></i> across 12 rounds.
+            3. Algebraic degree saturation: The algebraic normal form (ANF) degree of the 1024 state bits reaches maximum algebraic complexity (<i>d = 1023</i>) well before round 8.
             """
         ),
         # PAGE 10
@@ -478,24 +478,24 @@ def build_whitepaper_pdf(output_path: str):
             "8. Canonical Padding & Block Alignment Invariants",
             "Bit-Length Suffix Encoding and Ambiguity Prevention",
             """
-            In any cryptographic hash function operating on discrete block boundaries, the padding rule must establish a strict bijection between arbitrary unpadded byte sequences and valid padded block sequences. If two distinct inputs $M_1 \ne M_2$ can result in the same padded blocks, trivial hash collisions occur.
+            In any cryptographic hash function operating on discrete block boundaries, the padding rule must establish a strict bijection between arbitrary unpadded byte sequences and valid padded block sequences. If two distinct inputs <i>M<sub>1</sub>  &ne;  M<sub>2</sub></i> can result in the same padded blocks, trivial hash collisions occur.
             
             HCA specifies a deterministic, unambiguous bit-length suffix padding scheme operating on 64-byte (512-bit) block multiples.
             
             Formal Padding Specification:
-            Let $M$ be an arbitrary input message of byte length $|M| \ge 0$.
-            1. Mandatory Delimiter: A single byte with value <code>0x80</code> (binary <code>10000000</code>) is appended to $M$. This unequivocally marks the termination of message bytes.
-            2. Zero-Fill Alignment: $k \ge 0$ zero bytes (<code>0x00</code>) are appended, where $k$ is the smallest non-negative integer satisfying:
-               $$(|M| + 1 + k + 8) \equiv 0 \pmod{64}$$
+            Let <i>M</i> be an arbitrary input message of byte length <i>|M|  &ge;  0</i>.
+            1. Mandatory Delimiter: A single byte with value <code>0x80</code> (binary <code>10000000</code>) is appended to <i>M</i>. This unequivocally marks the termination of message bytes.
+            2. Zero-Fill Alignment: <i>k  &ge;  0</i> zero bytes (<code>0x00</code>) are appended, where <i>k</i> is the smallest non-negative integer satisfying:
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;(|M| + 1 + k + 8)  &equiv;  0  mod 64</font><br/>
             3. Message Length Binding: An 8-byte (64-bit) unsigned integer encoding the total bit length of the unpadded message in network big-endian order is appended:
-               $$\mathbf{L} = (|M| \times 8)_{\text{BE64}}$$
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>L</b> = (|M|  &times;  8)<sub>BE64</sub></font><br/>
                
             Theorem 2 (Padding Collision Freedom):
-            No two distinct messages $M_1 \ne M_2$ can produce identical padded byte sequences $P(M_1) = P(M_2)$.
+            No two distinct messages <i>M<sub>1</sub>  &ne;  M<sub>2</sub></i> can produce identical padded byte sequences <i>P(M<sub>1</sub>) = P(M<sub>2</sub>)</i>.
             
             Proof:
-            Case 1: $|M_1| \ne |M_2|$. The final 8 bytes of $P(M_1)$ and $P(M_2)$ encode $|M_1| \times 8$ and $|M_2| \times 8$ respectively. Because integer encoding is unique, the last 8 bytes differ, so $P(M_1) \ne P(M_2)$.
-            Case 2: $|M_1| = |M_2|$, but $M_1 \ne M_2$. Because $|M_1| = |M_2|$, the padding lengths $k_1 = k_2$ and suffix lengths are identical. Therefore, the difference between $M_1$ and $M_2$ is preserved in the first $|M_1|$ bytes of the block sequence, ensuring $P(M_1) \ne P(M_2)$.
+            Case 1: <i>|M<sub>1</sub>|  &ne;  |M<sub>2</sub>|</i>. The final 8 bytes of <i>P(M<sub>1</sub>)</i> and <i>P(M<sub>2</sub>)</i> encode <i>|M<sub>1</sub>|  &times;  8</i> and <i>|M<sub>2</sub>|  &times;  8</i> respectively. Because integer encoding is unique, the last 8 bytes differ, so <i>P(M<sub>1</sub>)  &ne;  P(M<sub>2</sub>)</i>.
+            Case 2: <i>|M<sub>1</sub>| = |M<sub>2</sub>|</i>, but <i>M<sub>1</sub>  &ne;  M<sub>2</sub></i>. Because <i>|M<sub>1</sub>| = |M<sub>2</sub>|</i>, the padding lengths <i>k<sub>1</sub> = k<sub>2</sub></i> and suffix lengths are identical. Therefore, the difference between <i>M<sub>1</sub></i> and <i>M<sub>2</sub></i> is preserved in the first <i>|M<sub>1</sub>|</i> bytes of the block sequence, ensuring <i>P(M<sub>1</sub>)  &ne;  P(M<sub>2</sub>)</i>.
             """,
             """
             Boundary Padding Examples:
@@ -516,27 +516,27 @@ def build_whitepaper_pdf(output_path: str):
             """
             The absorption phase is the core mechanism through which message data enters the HCA wide-pipe state. In accordance with sponge theory, data is absorbed exclusively into the rate portion of the state, preserving the capacity partition as an untouched cryptographic barrier.
             
-            Absorption Cycle for Block $B_j$ (index $j \in [0, N-1]$):
+            Absorption Cycle for Block <i>B<sub>j</sub></i> (index <i>j  &isin;  [0, N-1]</i>):
             1. Zero-Copy Pointer Word Decoding:
-               The 64-byte block $B_j$ is decoded as eight 64-bit big-endian words $W_0 \dots W_7$:
-               $$W_k = \text{DecodeBE64}(B_j[8k \dots 8k + 7])$$
+               The 64-byte block <i>B<sub>j</sub></i> is decoded as eight 64-bit big-endian words <i>W<sub>0</sub> dots W<sub>7</sub></i>:
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;W<sub>k</sub> = DecodeBE64(B<sub>j</sub>[8k dots 8k + 7])</font><br/>
                In HCA-0.3, this operation is executed via direct pointer casting in Rust (<code>*const [u8; 8]</code>), avoiding dynamic vector allocations and eliminating array bounds checks during hot loops.
             2. Rate XOR Injection:
-               Words $W_0 \dots W_7$ are XORed into rate registers $s_0 \dots s_7$:
-               $$\mathcal{S}[k] \leftarrow \mathcal{S}[k] \oplus W_k, \quad \forall k \in [0, 7]$$
+               Words <i>W<sub>0</sub> dots W<sub>7</sub></i> are XORed into rate registers <i>s<sub>0</sub> dots s<sub>7</sub></i>:
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>S</b>[k]  &le; ftarrow <b>S</b>[k]  &oplus;  W<sub>k</sub>, quad forall k  &isin;  [0, 7]</font><br/>
             3. Monotonic Block Index Binding:
-               To prevent block relocation and circular permutation slide attacks, the 64-bit block index $j$ is XORed into capacity word $s_8$:
-               $$\mathcal{S}[8] \leftarrow \mathcal{S}[8] \oplus j$$
+               To prevent block relocation and circular permutation slide attacks, the 64-bit block index <i>j</i> is XORed into capacity word <i>s<sub>8</sub></i>:
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>S</b>[8]  &le; ftarrow <b>S</b>[8]  &oplus;  j</font><br/>
             4. Domain Separation Injection:
-               Capacity word $s_9$ is XORed with the static absorption domain constant:
-               $$\mathcal{S}[9] \leftarrow \mathcal{S}[9] \oplus \mathcal{D}_{\text{absorb}}, \quad \mathcal{D}_{\text{absorb}} = \mathtt{0x4843414142534F52}$$
+               Capacity word <i>s<sub>9</sub></i> is XORed with the static absorption domain constant:
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>S</b>[9]  &le; ftarrow <b>S</b>[9]  &oplus;  <b>D</b><sub>absorb</sub>, quad <b>D</b><sub>absorb</sub> = <code>0x4843414142534F52</code></font><br/>
             5. Permutation Application:
                The full 1024-bit state undergoes 12 rounds of non-linear mixing:
-               $$\mathcal{S} \leftarrow \mathcal{M}(\mathcal{S})$$
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>S</b>  &le; ftarrow <b>M</b>(<b>S</b>)</font><br/>
             """,
             """
             The Capacity Barrier Principle:
-            Notice that capacity words $s_{10} \dots s_{15}$ receive no direct input injection. Because the capacity is 512 bits wide, an adversary attempting to control the entire state $\mathcal{S}$ must solve a constrained system across 512 unobserved, non-linearly diffused bits. 
+            Notice that capacity words <i>s<sub>10</sub> dots s<sub>15</sub></i> receive no direct input injection. Because the capacity is 512 bits wide, an adversary attempting to control the entire state <i><b>S</b></i> must solve a constrained system across 512 unobserved, non-linearly diffused bits. 
             This structural barrier prevents state-reconstruction attacks and guarantees that differential trails injected into the rate words are scrambled before subsequent blocks are absorbed.
             """
         ),
@@ -549,23 +549,23 @@ def build_whitepaper_pdf(output_path: str):
             
             Squeeze Phase Execution:
             1. Domain Separation Squeeze Transition:
-               Before any output bits are extracted, capacity word $s_9$ is updated with the output domain tag, followed by an execution of the 12-round mixing permutation:
-               $$\mathcal{S}[9] \leftarrow \mathcal{S}[9] \oplus \mathcal{D}_{\text{output}}, \quad \mathcal{D}_{\text{output}} = \mathtt{0x4843414F55545055}$$
-               $$\mathcal{S} \leftarrow \mathcal{M}(\mathcal{S})$$
-               This transition acts as a one-way mathematical ratchet. Once the output domain is injected, it is computationally infeasible to invert $\mathcal{M}(\mathcal{S})$ to recover the pre-squeeze state or deduce previously absorbed message blocks.
+               Before any output bits are extracted, capacity word <i>s<sub>9</sub></i> is updated with the output domain tag, followed by an execution of the 12-round mixing permutation:
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>S</b>[9]  &le; ftarrow <b>S</b>[9]  &oplus;  <b>D</b><sub>output</sub>, quad <b>D</b><sub>output</sub> = <code>0x4843414F55545055</code></font><br/>
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>S</b>  &le; ftarrow <b>M</b>(<b>S</b>)</font><br/>
+               This transition acts as a one-way mathematical ratchet. Once the output domain is injected, it is computationally infeasible to invert <i><b>M</b>(<b>S</b>)</i> to recover the pre-squeeze state or deduce previously absorbed message blocks.
             2. Rate Extraction:
-               The first 512 bits (64 bytes) of output are extracted directly from rate words $s_0 \dots s_7$ encoded as big-endian bytes:
-               $$\text{Block}_{\text{out}} = \text{EncodeBE64}(s_0) \,\|\, \text{EncodeBE64}(s_1) \,\|\, \dots \,\|\, \text{EncodeBE64}(s_7)$$
+               The first 512 bits (64 bytes) of output are extracted directly from rate words <i>s<sub>0</sub> dots s<sub>7</sub></i> encoded as big-endian bytes:
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;Block<sub>out</sub> = EncodeBE64(s<sub>0</sub>)  ||  EncodeBE64(s<sub>1</sub>)  ||  dots  ||  EncodeBE64(s<sub>7</sub>)</font><br/>
             3. Multi-Block Squeeze Expansion:
-               If the requested output length $L$ exceeds 64 bytes (e.g., 1024 bits = 128 bytes, or 4096 bits = 512 bytes):
-               - Consecutive 64-byte blocks are extracted by iteratively mixing the state: $\mathcal{S} \leftarrow \mathcal{M}(\mathcal{S})$ and reading out $s_0 \dots s_7$.
-               - The concatenated byte stream is truncated to exactly $L/8$ bytes.
+               If the requested output length <i>L</i> exceeds 64 bytes (e.g., 1024 bits = 128 bytes, or 4096 bits = 512 bytes):
+               - Consecutive 64-byte blocks are extracted by iteratively mixing the state: <i><b>S</b>  &le; ftarrow <b>M</b>(<b>S</b>)</i> and reading out <i>s<sub>0</sub> dots s<sub>7</sub></i>.
+               - The concatenated byte stream is truncated to exactly <i>L/8</i> bytes.
             """,
             """
             Prefix Consistency Invariant:
             In HCA-0.3, the output stream satisfies the sponge prefix consistency property:
-            For any output lengths $L_1 < L_2$, the $L_1$-bit digest is an exact prefix of the $L_2$-bit digest:
-            $$\text{HCA}(M, L_1) = \text{HCA}(M, L_2)[0 \dots L_1/8]$$
+            For any output lengths <i>L<sub>1</sub> < L<sub>2</sub></i>, the <i>L<sub>1</sub></i>-bit digest is an exact prefix of the <i>L<sub>2</sub></i>-bit digest:
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;HCA(M, L<sub>1</sub>) = HCA(M, L<sub>2</sub>)[0 dots L<sub>1</sub>/8]</font><br/>
             This property is verified systematically across our test suite via Hypothesis property testing.
             """
         ),
@@ -580,26 +580,26 @@ def build_whitepaper_pdf(output_path: str):
             
             HCATREE Algorithmic Specification:
             1. Threshold Evaluation:
-               If message byte length $|M| < 256\text{ KB}$, sequential single-pass HCA is retained to avoid thread scheduling latency.
+               If message byte length <i>|M| < 256 KB</i>, sequential single-pass HCA is retained to avoid thread scheduling latency.
             2. Chunk Partitioning:
-               For $|M| \ge 256\text{ KB}$, the message is partitioned into contiguous leaf chunks of size $\mathcal{C} = 128\text{ KB}$:
-               $$M = C_0 \,\|\, C_1 \,\|\, \dots \,\|\, C_{N-1}, \quad N = \lceil |M| / \mathcal{C} \rceil$$
+               For <i>|M|  &ge;  256 KB</i>, the message is partitioned into contiguous leaf chunks of size <i><b>C</b> = 128 KB</i>:
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;M = C<sub>0</sub>  ||  C<sub>1</sub>  ||  dots  ||  C<sub>N-1</sub>, quad N = lceil |M| / <b>C</b> rceil</font><br/>
             3. Independent Parallel Leaf Processing:
-               Each chunk $k \in [0, N-1]$ is hashed concurrently by worker threads using an isolated HCA-512 engine with a unique leaf domain header:
-               $$\text{Header}_k = \mathtt{"HCALEAF:"} \,\|\, (k)_{\text{BE64}}$$
-               $$\text{LeafNode}_k = \text{HCA-512}\left(\text{Header}_k \,\|\, C_k\right)$$
+               Each chunk <i>k  &isin;  [0, N-1]</i> is hashed concurrently by worker threads using an isolated HCA-512 engine with a unique leaf domain header:
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;Header<sub>k</sub> = <code>"HCALEAF:"</code>  ||  (k)<sub>BE64</sub></font><br/>
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;LeafNode<sub>k</sub> = HCA-512 &le; ft(Header<sub>k</sub>  ||  C<sub>k</sub>right)</font><br/>
             4. Recursive Binary Tree Reduction:
                The resulting array of 64-byte leaf digests is reduced pairwise until a single root digest is reached:
-               $$\text{ParentNode} = \text{HCA-512}\left(\mathtt{"HCATREE:"} \,\|\, \text{LeftChild} \,\|\, \text{RightChild}\right)$$
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;ParentNode = HCA-512 &le; ft(<code>"HCATREE:"</code>  ||  LeftChild  ||  RightChildright)</font><br/>
             5. Root Length Binding:
                The final root digest is bound to the total message length and squeezed to the user's requested output bit length:
-               $$\text{FinalDigest} = \text{HCA-Out}\left(\mathtt{"HCAROOT:"} \,\|\, \text{RootNode} \,\|\, (|M|)_{\text{BE64}}\right)$$
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;FinalDigest = HCA-Out &le; ft(<code>"HCAROOT:"</code>  ||  RootNode  ||  (|M|)<sub>BE64</sub>right)</font><br/>
             """,
             """
             Tree Hash Security Invariants:
             - Domain Separation: Leaf headers ("HCALEAF:"), internal nodes ("HCATREE:"), and the root node ("HCAROOT:") utilize distinct ASCII prefixes, preventing tree-node confusion attacks.
-            - Chunk Index Binding: Chunk index $k$ is explicitly bound into each leaf, preventing chunk transposition or reordering attacks.
-            - Length Binding: Total message byte length $|M|$ is absorbed into the root node, preventing length-manipulation collisions between messages that share identical leaf prefixes.
+            - Chunk Index Binding: Chunk index <i>k</i> is explicitly bound into each leaf, preventing chunk transposition or reordering attacks.
+            - Length Binding: Total message byte length <i>|M|</i> is absorbed into the root node, preventing length-manipulation collisions between messages that share identical leaf prefixes.
             """
         ),
         # PAGE 14
@@ -607,7 +607,7 @@ def build_whitepaper_pdf(output_path: str):
             "12. Leaf Chunk Sizing & L1/L2 Cache Micro-Architecture",
             "Cache Residency, Memory Bus Saturation, and Chunk Sizing",
             """
-            The choice of leaf chunk size $\mathcal{C}$ in tree hashing is the paramount performance parameter determining real-world throughput on x86_64 and ARM64 processors.
+            The choice of leaf chunk size <i><b>C</b></i> in tree hashing is the paramount performance parameter determining real-world throughput on x86_64 and ARM64 processors.
             
             During development of HCA, three candidate chunk sizes were benchmarked across high-scale payloads (10 MB to 500 MB):
             1. 16 KB Leaf Chunks (HCA-0.2 Prototype):
@@ -651,7 +651,7 @@ def build_whitepaper_pdf(output_path: str):
                     .collect();
             }
             </code>
-            This reduction proceeds in $\log_2(N)$ stages. For a 100 MB file (800 leaf nodes), the tree requires only 10 reduction stages, executing in under 0.8 milliseconds total reduction time.
+            This reduction proceeds in <i>log<sub>2</sub>(N)</i> stages. For a 100 MB file (800 leaf nodes), the tree requires only 10 reduction stages, executing in under 0.8 milliseconds total reduction time.
             """,
             """
             System Performance Characteristics:
@@ -703,24 +703,24 @@ def build_whitepaper_pdf(output_path: str):
             The mathematical flexibility of the sponge construction permits stateful duplexing, allowing HCA to serve as a high-speed symmetric stream cipher without introducing auxiliary block cipher primitives.
             
             Stream Cipher State Initialization:
-            Given a 256-bit Key ($K$) and a 128-bit Nonce ($N$):
-            1. The state $\mathcal{S}$ is initialized with $\mathbf{IV}$.
-            2. The 32 bytes of $K$ are absorbed into rate words $s_0 \dots s_3$.
-            3. The 16 bytes of $N$ are absorbed into rate words $s_4 \dots s_5$.
-            4. Capacity word $s_9$ is updated with the stream cipher domain:
-               $$\mathcal{S}[9] \leftarrow \mathcal{S}[9] \oplus \mathcal{D}_{\text{cipher}}, \quad \mathcal{D}_{\text{cipher}} = \mathtt{0x4843414349504852}$$
-            5. The state is mixed: $\mathcal{S} \leftarrow \mathcal{M}(\mathcal{S})$.
+            Given a 256-bit Key (<i>K</i>) and a 128-bit Nonce (<i>N</i>):
+            1. The state <i><b>S</b></i> is initialized with <i><b>IV</b></i>.
+            2. The 32 bytes of <i>K</i> are absorbed into rate words <i>s<sub>0</sub> dots s<sub>3</sub></i>.
+            3. The 16 bytes of <i>N</i> are absorbed into rate words <i>s<sub>4</sub> dots s<sub>5</sub></i>.
+            4. Capacity word <i>s<sub>9</sub></i> is updated with the stream cipher domain:
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>S</b>[9]  &le; ftarrow <b>S</b>[9]  &oplus;  <b>D</b><sub>cipher</sub>, quad <b>D</b><sub>cipher</sub> = <code>0x4843414349504852</code></font><br/>
+            5. The state is mixed: <i><b>S</b>  &le; ftarrow <b>M</b>(<b>S</b>)</i>.
             
             Keystream Generation & XOR Masking:
-            For each 64-byte block of plaintext $P_j$:
-            - A 64-byte keystream block $\mathcal{K}_j$ is extracted from rate words $s_0 \dots s_7$.
-            - Ciphertext is produced by bitwise XOR: $C_j = P_j \oplus \mathcal{K}_j$.
-            - Capacity word $s_8$ absorbs block counter $j$: $\mathcal{S}[8] \leftarrow \mathcal{S}[8] \oplus j$.
-            - The state is mixed for the next block: $\mathcal{S} \leftarrow \mathcal{M}(\mathcal{S})$.
+            For each 64-byte block of plaintext <i>P<sub>j</sub></i>:
+            - A 64-byte keystream block <i><b>K</b><sub>j</sub></i> is extracted from rate words <i>s<sub>0</sub> dots s<sub>7</sub></i>.
+            - Ciphertext is produced by bitwise XOR: <i>C<sub>j</sub> = P<sub>j</sub>  &oplus;  <b>K</b><sub>j</sub></i>.
+            - Capacity word <i>s<sub>8</sub></i> absorbs block counter <i>j</i>: <i><b>S</b>[8]  &le; ftarrow <b>S</b>[8]  &oplus;  j</i>.
+            - The state is mixed for the next block: <i><b>S</b>  &le; ftarrow <b>M</b>(<b>S</b>)</i>.
             """,
             """
             Security Considerations for Stream Mode:
-            - Nonce Uniqueness: As with all stream ciphers (e.g., ChaCha20, AES-CTR), a (Key, Nonce) pair must never be reused. Nonce reuse immediately allows an attacker to compute $C_1 \oplus C_2 = P_1 \oplus P_2$, compromising plaintext confidentiality.
+            - Nonce Uniqueness: As with all stream ciphers (e.g., ChaCha20, AES-CTR), a (Key, Nonce) pair must never be reused. Nonce reuse immediately allows an attacker to compute <i>C<sub>1</sub>  &oplus;  C<sub>2</sub> = P<sub>1</sub>  &oplus;  P<sub>2</sub></i>, compromising plaintext confidentiality.
             - Authentication Requirement: Unauthenticated stream ciphers are vulnerable to bit-flipping malleability attacks. Therefore, production usage requires the AEAD construction detailed in Section 16.
             """
         ),
@@ -733,25 +733,25 @@ def build_whitepaper_pdf(output_path: str):
             
             AEAD Encryption Protocol:
             1. Initialization:
-               - Absorb 256-bit Key and 128-bit Nonce into state $\mathcal{S}$.
-               - Inject AEAD domain tag: $\mathcal{S}[9] \leftarrow \mathcal{S}[9] \oplus \mathcal{D}_{\text{aead}}$ ($\mathtt{0x4843414145414400}$).
-               - Mix state: $\mathcal{S} \leftarrow \mathcal{M}(\mathcal{S})$.
-            2. Associated Data ($\text{AD}$) Processing:
-               - Associated Data (e.g., packet headers, metadata) is absorbed into rate words $s_0 \dots s_7$.
+               - Absorb 256-bit Key and 128-bit Nonce into state <i><b>S</b></i>.
+               - Inject AEAD domain tag: <i><b>S</b>[9]  &le; ftarrow <b>S</b>[9]  &oplus;  <b>D</b><sub>aead</sub></i> (<i><code>0x4843414145414400</code></i>).
+               - Mix state: <i><b>S</b>  &le; ftarrow <b>M</b>(<b>S</b>)</i>.
+            2. Associated Data (<i>AD</i>) Processing:
+               - Associated Data (e.g., packet headers, metadata) is absorbed into rate words <i>s<sub>0</sub> dots s<sub>7</sub></i>.
                - The state is mixed after each 64-byte block. No ciphertext is emitted during AD absorption.
             3. Plaintext Encryption & Ciphertext Absorption:
-               - For each 64-byte plaintext block $P_j$, squeeze keystream $\mathcal{K}_j$ and compute $C_j = P_j \oplus \mathcal{K}_j$.
-               - Crucially, the ciphertext block $C_j$ is immediately absorbed back into rate words $s_0 \dots s_7$ before the next state permutation:
-                 $$\mathcal{S}[0..7] \leftarrow \mathcal{S}[0..7] \oplus C_j, \quad \mathcal{S} \leftarrow \mathcal{M}(\mathcal{S})$$
+               - For each 64-byte plaintext block <i>P<sub>j</sub></i>, squeeze keystream <i><b>K</b><sub>j</sub></i> and compute <i>C<sub>j</sub> = P<sub>j</sub>  &oplus;  <b>K</b><sub>j</sub></i>.
+               - Crucially, the ciphertext block <i>C<sub>j</sub></i> is immediately absorbed back into rate words <i>s<sub>0</sub> dots s<sub>7</sub></i> before the next state permutation:
+                 <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;<b>S</b>[0..7]  &le; ftarrow <b>S</b>[0..7]  &oplus;  C<sub>j</sub>, quad <b>S</b>  &le; ftarrow <b>M</b>(<b>S</b>)</font><br/>
                  This binds the evolving ciphertext sequence irreversibly into the internal state.
             4. Authentication Tag Generation:
-               - Squeeze 256 bits (32 bytes) from rate words $s_0 \dots s_3$ as the authentication tag $\mathcal{T}$.
-               - Emit payload: $\text{Nonce} \,\|\, \mathcal{T} \,\|\, \text{Ciphertext}$.
+               - Squeeze 256 bits (32 bytes) from rate words <i>s<sub>0</sub> dots s<sub>3</sub></i> as the authentication tag <i><b>T</b></i>.
+               - Emit payload: <i>Nonce  ||  <b>T</b>  ||  Ciphertext</i>.
             """,
             """
             AEAD Decryption & Constant-Time Verification:
-            During decryption, the receiver re-absorbs Nonce, Key, and Associated Data, decrypts ciphertext, and re-computes tag $\mathcal{T}'$. 
-            The received tag $\mathcal{T}$ and calculated tag $\mathcal{T}'$ are compared in strict constant time. 
+            During decryption, the receiver re-absorbs Nonce, Key, and Associated Data, decrypts ciphertext, and re-computes tag <i><b>T</b>'</i>. 
+            The received tag <i><b>T</b></i> and calculated tag <i><b>T</b>'</i> are compared in strict constant time. 
             If verification fails, the decrypted plaintext is wiped immediately and an error is raised, preventing chosen-ciphertext and padding-oracle attacks.
             """
         ),
@@ -770,10 +770,10 @@ def build_whitepaper_pdf(output_path: str):
             
             Differential Verification Vectors:
             - Known-Answer-Test (KAT) vectors derived from the formal specification.
-            - Empty inputs ($|M| = 0$).
-            - Single-byte messages ($|M| = 1$).
-            - Critical 64-byte block boundaries: $|M| \in \{55, 56, 63, 64, 65, 119, 120, 127, 128, 129, 256, 1024\}$ bytes.
-            - Squeeze output lengths: $\{128, 192, 256, 384, 512, 1024, 2048, 4096\}$ bits.
+            - Empty inputs (<i>|M| = 0</i>).
+            - Single-byte messages (<i>|M| = 1</i>).
+            - Critical 64-byte block boundaries: <i>|M|  &isin;  55, 56, 63, 64, 65, 119, 120, 127, 128, 129, 256, 1024</i> bytes.
+            - Squeeze output lengths: <i>128, 192, 256, 384, 512, 1024, 2048, 4096</i> bits.
             - Streaming chunk variations: Feeding data via 1-byte, 7-byte, and 63-byte streaming updates versus single-pass one-shot evaluation.
             """,
             """
@@ -792,8 +792,8 @@ def build_whitepaper_pdf(output_path: str):
             
             Key Verified Properties:
             1. Metamorphic Chunking Invariance:
-               $$\text{HCA-OneShot}(M) \equiv \text{HCA-Streaming}(M, \text{random chunks})$$
-               For any random partition of message $M$ into arbitrary sub-slices $m_0, m_1, \dots, m_k$, feeding sub-slices sequentially yields the identical digest as one-shot absorption.
+               <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;HCA-OneShot(M)  &equiv;  HCA-Streaming(M, random chunks)</font><br/>
+               For any random partition of message <i>M</i> into arbitrary sub-slices <i>m<sub>0</sub>, m<sub>1</sub>, dots, m<sub>k</sub></i>, feeding sub-slices sequentially yields the identical digest as one-shot absorption.
             2. Idempotent Finalization:
                Calling <code>hasher.finalize()</code> repeatedly on an engine produces identical digests without mutating the final state.
             3. Clone & State Independence:
@@ -870,21 +870,21 @@ def build_whitepaper_pdf(output_path: str):
             "21. Cryptanalytic Properties & Differential Trails",
             "Non-Linear Differential Dispersion and Active S-Box Analogues",
             """
-            In differential cryptanalysis (Biham & Shamir), an attacker injects an input difference $\Delta_{\text{in}} = x \oplus x^*$ and traces the probability of encountering specific output differences $\Delta_{\text{out}}$ through successive rounds.
+            In differential cryptanalysis (Biham & Shamir), an attacker injects an input difference <i>&Delta;<sub>in</sub> = x  &oplus;  x^*</i> and traces the probability of encountering specific output differences <i>&Delta;<sub>out</sub></i> through successive rounds.
             
             In an ARX cipher, modular addition carries act as the primary differential branching mechanism. Lipmaa and Moriai demonstrated that the differential probability of modular addition satisfies:
-            $$\text{Pr}\left[ (x \oplus \Delta_x) + (y \oplus \Delta_y) = (x + y) \oplus \Delta_z \right] \le 2^{-\text{wt}((\Delta_x \lor \Delta_y \lor \Delta_z) \ll 1)}$$
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;Pr &le; ft[ (x  &oplus;  &Delta;<sub>x</sub>) + (y  &oplus;  &Delta;<sub>y</sub>) = (x + y)  &oplus;  &Delta;<sub>z</sub> right]  &le;  2<sup>-wt((&Delta;<sub>x</sub> lor &Delta;<sub>y</sub> lor &Delta;<sub>z</sub>)  &Lt;  1)</sup></font><br/>
             
             Differential Trail Resistance in HCA:
             1. Triple Cross-Round Rotations:
-               In each round, every word undergoes three distinct rotation operations: cyclic shift by 13 on $s_{\text{next}}$, dynamic shift $\text{rot}_b = (7i + 3r) \bmod 64$, and output shift $\text{rot}_t = (11i + 7r + 1) \bmod 64$. 
+               In each round, every word undergoes three distinct rotation operations: cyclic shift by 13 on <i>s<sub>next</sub></i>, dynamic shift <i>rot<sub>b</sub> = (7i + 3r)  mod  64</i>, and output shift <i>rot<sub>t</sub> = (11i + 7r + 1)  mod  64</i>. 
                Because these rotation distances are coprime to 64, low-weight differential trails are systematically broken apart.
             2. Multi-Word Linear Addition Coupling:
-               Computing $s_{\text{sum}} = s[(i+4) \bmod 16] + s[(i+11) \bmod 16]$ injects differences from two non-adjacent state words simultaneously. An input difference in a single word activates at least 4 addition operations in round 1, 14 addition operations in round 2, and all 16 addition operations by round 3.
+               Computing <i>s<sub>sum</sub> = s[(i+4)  mod  16] + s[(i+11)  mod  16]</i> injects differences from two non-adjacent state words simultaneously. An input difference in a single word activates at least 4 addition operations in round 1, 14 addition operations in round 2, and all 16 addition operations by round 3.
             """,
             """
             Empirical Trail Bound:
-            No differential trail with probability greater than $2^{-80}$ has been discovered spanning more than 4 rounds of HCA's mixing permutation. Across 12 rounds, the maximum theoretical trail probability is estimated to fall well below $2^{-256}$.
+            No differential trail with probability greater than <i>2<sup>-80</sup></i> has been discovered spanning more than 4 rounds of HCA's mixing permutation. Across 12 rounds, the maximum theoretical trail probability is estimated to fall well below <i>2<sup>-256</sup></i>.
             """
         ),
         # PAGE 24
@@ -892,21 +892,21 @@ def build_whitepaper_pdf(output_path: str):
             "22. Rotational Symmetries & Linear Distinguisher Analysis",
             "Rotational Cryptanalysis and Linear Approximation Bounds",
             """
-            Rotational cryptanalysis (Khovratovich & Nikolić) exploits symmetries in ARX ciphers where rotating an input word circularly by $\delta$ bits results in an output that is also rotated by $\delta$ bits:
-            $$(x \lll \delta) + (y \lll \delta) = (x + y) \lll \delta \quad \text{with probability } p \approx 2^{-1.41}$$
+            Rotational cryptanalysis (Khovratovich & Nikolić) exploits symmetries in ARX ciphers where rotating an input word circularly by <i>&delta;</i> bits results in an output that is also rotated by <i>&delta;</i> bits:
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;(x  &Lt; l &delta;) + (y  &Lt; l &delta;) = (x + y)  &Lt; l &delta; quad with probability  p  &asymp;  2<sup>-1.41</sup></font><br/>
             
             HCA's Resistance to Rotational Cryptanalysis:
             1. Asymmetric Round Constants:
-               In each round, $s_{\text{next}}$ is XORed with round constant $\mathbf{RC}[r][i]$ prior to addition. Because SplitMix64 generates pseudorandom constants without rotational symmetry ($\mathbf{RC}[r][i] \ne \mathbf{RC}[r][i] \lll \delta$), the rotational invariant is shattered at round 1.
+               In each round, <i>s<sub>next</sub></i> is XORed with round constant <i><b>RC</b>[r][i]</i> prior to addition. Because SplitMix64 generates pseudorandom constants without rotational symmetry (<i><b>RC</b>[r][i]  &ne;  <b>RC</b>[r][i]  &Lt; l &delta;</i>), the rotational invariant is shattered at round 1.
             2. Variable Rotation Exponents:
-               The rotation distances $\text{rot}_b(i, r)$ and $\text{rot}_t(i, r)$ depend explicitly on word index $i$ and round index $r$. Even if an attacker could construct a rotational pair across word $i$, words $i+1$ and $i+4$ rotate by completely different offsets, invalidating rotational alignment across words.
+               The rotation distances <i>rot<sub>b</sub>(i, r)</i> and <i>rot<sub>t</sub>(i, r)</i> depend explicitly on word index <i>i</i> and round index <i>r</i>. Even if an attacker could construct a rotational pair across word <i>i</i>, words <i>i+1</i> and <i>i+4</i> rotate by completely different offsets, invalidating rotational alignment across words.
                
             Linear Cryptanalysis Bounds:
-            Linear approximations of modular addition deteriorate rapidly as the number of active additions increases. Matsui's Piling-Up Lemma demonstrates that the overall correlation of a linear approximation across 12 rounds satisfies $\epsilon_{\text{total}} \ll 2^{-512}$, rendering linear distinguishers ineffective against the full permutation.
+            Linear approximations of modular addition deteriorate rapidly as the number of active additions increases. Matsui's Piling-Up Lemma demonstrates that the overall correlation of a linear approximation across 12 rounds satisfies <i>&epsilon;<sub>total</sub>  &Lt;  2<sup>-512</sup></i>, rendering linear distinguishers ineffective against the full permutation.
             """,
             """
             Conclusion on Distinguishers:
-            Neither rotational nor linear distinguishers have been identified that distinguish the 12-round permutation $\mathcal{M}(\mathcal{S})$ from a uniform random permutation on $(\mathbb{Z}_{2^{64}})^{16}$.
+            Neither rotational nor linear distinguishers have been identified that distinguish the 12-round permutation <i><b>M</b>(<b>S</b>)</i> from a uniform random permutation on <i>(<b>Z</b><sub>2<sup>64</sup></sub>)<sup>16</sup></i>.
             """
         ),
         # PAGE 25
@@ -917,22 +917,22 @@ def build_whitepaper_pdf(output_path: str):
             A defining advantage of HCA over traditional Merkle-Damgård constructions is its provable structural immunity to length-extension attacks.
             
             The Mechanics of Length Extension Resistance:
-            In SHA-256, the entire 256-bit internal state is exposed as the digest. An attacker who knows $H(M)$ can initialize a SHA-256 state directly with the digest bytes, append extension data $M'$, and compute $H(M \,\|\, \text{pad} \,\|\, M')$ without knowledge of $M$.
+            In SHA-256, the entire 256-bit internal state is exposed as the digest. An attacker who knows <i>H(M)</i> can initialize a SHA-256 state directly with the digest bytes, append extension data <i>M'</i>, and compute <i>H(M  ||  pad  ||  M')</i> without knowledge of <i>M</i>.
             
             In HCA:
-            - The internal state is 1024 bits wide ($b = 1024$).
-            - The capacity is 512 bits wide ($c = 512$).
-            - When extracting a 256-bit or 512-bit digest during the squeeze phase, the 512 capacity bits ($s_8 \dots s_{15}$) are **never** revealed in the output.
-            - To extend an HCA digest, an adversary must guess the 512 unobserved capacity bits, requiring an infeasible search complexity of $2^{512}$ operations.
+            - The internal state is 1024 bits wide (<i>b = 1024</i>).
+            - The capacity is 512 bits wide (<i>c = 512</i>).
+            - When extracting a 256-bit or 512-bit digest during the squeeze phase, the 512 capacity bits (<i>s<sub>8</sub> dots s<sub>15</sub></i>) are **never** revealed in the output.
+            - To extend an HCA digest, an adversary must guess the 512 unobserved capacity bits, requiring an infeasible search complexity of <i>2<sup>512</sup></i> operations.
             
             Multi-Collision Resistance:
-            In iterated Merkle-Damgård hashes, Joux multi-collisions allow generation of $2^k$ collisions in $k \cdot 2^{n/2}$ work. 
-            Because HCA maintains a 512-bit capacity, sponge indifferentiability theorems prove that finding multi-collisions requires work proportional to generic random oracle multi-collision bounds ($2^{c/2} = 2^{256}$).
+            In iterated Merkle-Damgård hashes, Joux multi-collisions allow generation of <i>2<sup>k</sup></i> collisions in <i>k  &middot;  2<sup>n/2</sup></i> work. 
+            Because HCA maintains a 512-bit capacity, sponge indifferentiability theorems prove that finding multi-collisions requires work proportional to generic random oracle multi-collision bounds (<i>2<sup>c/2</sup> = 2<sup>256</sup></i>).
             """,
             """
             Formal Security Bound:
-            $$\text{Security}_{\text{Collision}} = \min(2^{L/2}, 2^{c/2}) = \min(2^{L/2}, 2^{256})$$
-            $$\text{Security}_{\text{Preimage}} = \min(2^{L}, 2^{c}) = \min(2^{L}, 2^{512})$$
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;Security<sub>Collision</sub> = min(2<sup>L/2</sup>, 2<sup>c/2</sup>) = min(2<sup>L/2</sup>, 2<sup>256</sup>)</font><br/>
+            <br/><font name="Courier-Bold" size="8.5" color="#0F172A">&nbsp;&nbsp;&nbsp;&nbsp;Security<sub>Preimage</sub> = min(2<sup>L</sup>, 2<sup>c</sup>) = min(2<sup>L</sup>, 2<sup>512</sup>)</font><br/>
             For standard 512-bit digests, HCA provides full 256-bit collision security and 512-bit preimage security.
             """
         ),
@@ -945,7 +945,7 @@ def build_whitepaper_pdf(output_path: str):
             
             HCA Constant-Time Implementation Guarantees:
             1. Zero S-Box / Table Lookups:
-               The entire mixing permutation $\mathcal{M}(\mathcal{S})$ executes using exclusively native register operations (ADD, XOR, ROTL). There are no memory lookups indexed by secret key or message data, rendering HCA immune to Bernstein-style cache-collision timing attacks.
+               The entire mixing permutation <i><b>M</b>(<b>S</b>)</i> executes using exclusively native register operations (ADD, XOR, ROTL). There are no memory lookups indexed by secret key or message data, rendering HCA immune to Bernstein-style cache-collision timing attacks.
             2. Branch-Free Permutation Execution:
                The inner 12-round mixing loop executes a strictly fixed instruction sequence. There are no data-dependent conditional branches (<code>if/else</code>) in the hot mixing path.
             3. Constant-Time AEAD Tag Verification:
@@ -1036,7 +1036,7 @@ def build_whitepaper_pdf(output_path: str):
                HCA has been designed and tested by an independent open-source team. It has not undergone formal multi-year cryptanalysis by academic institutions, NIST, or international cryptographic bodies. Passing statistical tests (such as avalanche or BigCrush) is a necessary condition for security, but **never** a sufficient proof of security.
                
             2. Invertibility of the Internal Permutation:
-               Like Keccak's $\text{Keccak-}f$ permutation, HCA's 12-round mixing permutation $\mathcal{M}(\mathcal{S})$ is structurally invertible if capacity words were known. The one-wayness of HCA relies entirely on the sponge capacity barrier ($c = 512$). Any mathematical discovery that permits distinguishing or inverting the capacity without knowing intermediate states would compromise the construction.
+               Like Keccak's <i>Keccak-<i>f</i></i> permutation, HCA's 12-round mixing permutation <i><b>M</b>(<b>S</b>)</i> is structurally invertible if capacity words were known. The one-wayness of HCA relies entirely on the sponge capacity barrier (<i>c = 512</i>). Any mathematical discovery that permits distinguishing or inverting the capacity without knowing intermediate states would compromise the construction.
                
             3. Absence of Dedicated Hardware Instruction Sets:
                Unlike AES (AES-NI) or SHA-256 (Intel SHA-NI), HCA does not possess dedicated microcode or ASIC execution units in silicon. While HCA-Parallel achieves 1.58 GB/s via multi-core concurrency, single-threaded scalar throughput is bounded at ~77 MB/s.
