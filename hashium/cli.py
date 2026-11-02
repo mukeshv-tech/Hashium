@@ -94,8 +94,13 @@ def cmd_decrypt(args):
             payload = f.read().strip()
     elif args.payload:
         payload = args.payload
+    elif args.payload_pos:
+        payload = args.payload_pos
+    elif not sys.stdin.isatty():
+        # Read payload piped via standard input
+        payload = sys.stdin.read().strip()
     else:
-        print("Error: Provide payload (-p) or input file (-f).", file=sys.stderr)
+        print("Error: Provide payload string as argument/flag (-p/--payload), input file (-f), or pipe via terminal.", file=sys.stderr)
         sys.exit(1)
 
     try:
@@ -153,6 +158,7 @@ def main():
 
     # Subcommand: decrypt
     p_dec = subparsers.add_parser("decrypt", help="Decrypt an HCA-0.2 encrypted payload")
+    p_dec.add_argument("payload_pos", nargs="?", help="Encrypted payload positional string (optional)")
     p_dec.add_argument("-k", "--key", required=True, help="Secret decryption key")
     p_dec.add_argument("-p", "--payload", help="Encrypted payload string (<nonce>:<ciphertext> or <nonce>:<tag>:<ciphertext>)")
     p_dec.add_argument("-f", "--file", help="Path to file containing encrypted payload")
