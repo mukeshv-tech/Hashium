@@ -1,11 +1,11 @@
-# HCA-0.1: Hashium Custom Algorithm Formal Specification
+# HCA-0.2: Hashium Custom Algorithm Formal Specification
 
-**Version:** 0.1 (Experimental)  
+**Version:** 0.2 (Native Prototype)  
 **Status:** Experimental / Non-Standardized  
 **Author:** Hashium Development Team
 
 > [!WARNING]
-> **Experimental Primitive**: HCA-0.1 is an experimental hash construction created for research and educational purposes. It has not undergone peer review or rigorous cryptanalysis. It must NEVER be used for passwords, authentication, digital signatures, encryption, financial systems, or security-critical applications.
+> **Experimental Primitive**: HCA-0.2 is an experimental hash construction created for research and educational purposes. It has not undergone peer review or rigorous cryptanalysis. It must NEVER be used for passwords, authentication, digital signatures, encryption, financial systems, or security-critical applications.
 
 ---
 
@@ -14,7 +14,7 @@
 | Property | Value | Description |
 |---|---|---|
 | Algorithm Name | Hashium Custom Algorithm | Experimental sponge-like hashing construction |
-| Identifier | `HCA-0.1` | Protocol and header identifier |
+| Identifier | `HCA-0.2` | Protocol and header identifier |
 | State Size | 1024 bits | 16 × 64-bit unsigned words |
 | Word Size | 64 bits | Unsigned, big-endian representation |
 | Block Size | 64 bytes (512 bits) | Input absorption block |
@@ -54,13 +54,13 @@ $$IV[i] = G[i] \quad \text{for } i \in [0, 15]$$
 
 ## 4. Round Constants ($RC$)
 
-The permutation uses 12 rounds, with 16 constants per round (total 192 constants).
+The mixing transformation uses 12 rounds, with 16 constants per round (total 192 constants).
 These are taken sequentially as the next 192 values produced by SplitMix64:
 $$RC[r][i] = G[16 + 16 \times r + i] \quad \text{for } r \in [0, 11], \, i \in [0, 15]$$
 
 ---
 
-## 5. Permutation / Mixing Transformation
+## 5. Twelve-Round Experimental Mixing Transformation
 
 A single execution of the 12-round mixing transformation maps state $S$ to $S'$.
 

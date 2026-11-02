@@ -26,14 +26,14 @@ impl SplitMix64 {
 pub fn generate_constants() -> ([u64; 16], [[u64; 16]; 12]) {
     let mut sm = SplitMix64::new(SPLITMIX64_SEED);
     let mut iv = [0u64; 16];
-    for i in 0..16 {
-        iv[i] = sm.next_u64();
+    for item in &mut iv {
+        *item = sm.next_u64();
     }
 
     let mut rc = [[0u64; 16]; 12];
-    for r in 0..12 {
-        for i in 0..16 {
-            rc[r][i] = sm.next_u64();
+    for round in &mut rc {
+        for item in round {
+            *item = sm.next_u64();
         }
     }
 

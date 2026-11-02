@@ -1,9 +1,9 @@
 pub mod absorb;
 pub mod constants;
 pub mod hasher;
+pub mod mixing;
 pub mod output;
 pub mod padding;
-pub mod permutation;
 pub mod state;
 
 use hasher::HCAEngine;
@@ -21,7 +21,7 @@ impl PyHCAHasher {
     #[new]
     #[pyo3(signature = (output_bits=512))]
     pub fn new(output_bits: usize) -> PyResult<Self> {
-        let engine = HCAEngine::new(output_bits).map_err(|e| PyValueError::new_err(e))?;
+        let engine = HCAEngine::new(output_bits).map_err(PyValueError::new_err)?;
         Ok(Self { engine })
     }
 
@@ -42,7 +42,7 @@ impl PyHCAHasher {
 
         self.engine
             .update(&bytes_vec)
-            .map_err(|e| PyValueError::new_err(e))?;
+            .map_err(PyValueError::new_err)?;
         Ok(())
     }
 

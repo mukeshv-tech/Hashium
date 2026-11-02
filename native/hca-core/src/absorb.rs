@@ -1,5 +1,5 @@
 use crate::constants::ABSORB_DOMAIN;
-use crate::permutation::mix_12_rounds;
+use crate::mixing::mix_12_rounds;
 use crate::state::HCAState;
 
 pub fn absorb_block(

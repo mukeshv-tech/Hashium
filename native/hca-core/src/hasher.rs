@@ -17,7 +17,7 @@ pub struct HCAEngine {
 
 impl HCAEngine {
     pub fn new(output_bits: usize) -> Result<Self, String> {
-        if output_bits < 128 || output_bits > 4096 || output_bits % 8 != 0 {
+        if !(128..=4096).contains(&output_bits) || !output_bits.is_multiple_of(8) {
             return Err(format!(
                 "output_bits must be between 128 and 4096 and a multiple of 8, got {}",
                 output_bits
@@ -99,8 +99,8 @@ impl HCAEngine {
         padded.resize(padded.len() + k, 0x00);
         padded.extend_from_slice(&len_bits.to_be_bytes());
 
-        for chunk in padded.chunks_exact(64) {
-            let block: &[u8; 64] = chunk.try_into().unwrap();
+        let (chunks, _) = padded.as_chunks::<64>();
+        for block in chunks {
             absorb_block(&mut state, block, block_count, &self.rc);
             block_count = block_count.wrapping_add(1);
         }

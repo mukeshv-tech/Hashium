@@ -1,12 +1,8 @@
 use crate::constants::OUTPUT_DOMAIN;
-use crate::permutation::mix_12_rounds;
+use crate::mixing::mix_12_rounds;
 use crate::state::HCAState;
 
-pub fn squeeze(
-    mut state: HCAState,
-    output_bytes: usize,
-    rc: &[[u64; 16]; 12],
-) -> Vec<u8> {
+pub fn squeeze(mut state: HCAState, output_bytes: usize, rc: &[[u64; 16]; 12]) -> Vec<u8> {
     let mut output = Vec::with_capacity(output_bytes + 64);
     let mut q: u64 = 0;
 
