@@ -10,15 +10,17 @@ from hashium.experimental.hca import (
     hca,
     hca_encrypt,
     hca_decrypt,
+    hca_aead_encrypt,
+    hca_aead_decrypt,
 )
 
 
 def main():
     hashium = Hashium()
 
-    print("=" * 75)
-    print("             HASHIUM CRYPTOGRAPHY TOOLKIT — MAXIMUM EXTENT DEMO")
-    print("=" * 75)
+    print("=" * 80)
+    print("           HASHIUM CRYPTOGRAPHY TOOLKIT — OPTIMIZED & AEAD DEMO")
+    print("=" * 80)
 
     # 1. Basic SHA-256 Hash
     print("\n1. Basic SHA-256 Hash:")
@@ -44,7 +46,7 @@ def main():
     print("   Result:", argon_hash)
     print("   Verify Argon2:", hashium.verify_argon2("mypassword", argon_hash))
 
-    # 6. AES Encryption/Decryption
+    # 6. AES-256 Encryption/Decryption
     print("\n6. AES-256 Encryption and Decryption:")
     encrypted = hashium.encrypt_data("mypassword")
     print("   Encrypted:", encrypted)
@@ -64,8 +66,8 @@ def main():
         if demo_created and os.path.exists("demo.txt"):
             os.remove("demo.txt")
 
-    # 8. Digital Signature with RSA-4096 (Max RSA standard)
-    print("\n8. RSA-4096 Digital Signature (Maximum Security Parameter):")
+    # 8. Digital Signature with RSA-4096
+    print("\n8. RSA-4096 Digital Signature:")
     private_key, public_key = hashium.generate_rsa_keys(key_size=4096)
     signature = hashium.sign_data("secure message", private_key)
     print("   Signature (Base64):", signature[:64] + "...")
@@ -75,54 +77,79 @@ def main():
     print("\n9. Ultra Secure Hash (768+ bits):")
     print("   Result:", hashium.hashium_ultra_secure("mypassword"))
 
-    # 10. Experimental HCA-0.2 Max Capacity & Max Scale Demonstrator
-    print("\n" + "=" * 75)
-    print("    EXPERIMENTAL: HCA-0.2 — MAXIMUM SPECIFICATION PARAMETERS (4096 BITS)")
-    print("=" * 75)
+    # 10. Experimental HCA-0.2 (Hashium Custom Algorithm)
+    print("\n" + "=" * 80)
+    print("    EXPERIMENTAL: HCA-0.2 (SIMD-Optimized Sponge Hashing & AEAD)")
+    print("=" * 80)
     print("   [!] Research prototype: Not for production security use.")
 
-    # 10a. Full Progression to the Theoretical Maximum Output Size (4096 bits / 512 bytes)
-    print("\n10a. HCA-0.2 Variable Output Progression (Max Specification: 4096 Bits):")
+    # 10a. Variable Output Lengths (Max 4096 bits)
+    print("\n10a. HCA-0.2 Variable Output Progression (128 bits -> 4096 bits):")
     msg = b"Hashium Maximum Sponge Extraction Vector"
-    all_bit_steps = [128, 256, 512, 1024, 2048, 3072, 4096]
+    all_bit_steps = [128, 256, 512, 1024, 2048, 4096]
     for bits in all_bit_steps:
         d = hca(msg, output_bits=bits)
-        print(f"   -> {bits:4d} bits ({bits // 8:3d} bytes) [Hex length: {len(d.hex()):4d}]: {d.hex()[:28]}...{d.hex()[-16:]}")
+        print(f"   -> {bits:4d} bits ({bits // 8:3d} bytes): {d.hex()[:32]}...{d.hex()[-16:]}")
 
-    # Full display of the maximum 4096-bit digest
-    max_digest = hca(msg, output_bits=4096)
-    print("\n   [+] Complete 4096-Bit (512-Byte) Giant Digest (1024 hex chars):")
-    hex_str = max_digest.hex()
-    for row in range(0, len(hex_str), 128):
-        print(f"       {hex_str[row:row+128]}")
-
-    # 10b. Max Incremental Input Stress (Large Payload Stream)
-    print("\n10b. HCA-0.2 Max Input Progression (0 Bytes -> 100,000 Bytes):")
-    large_steps = [0, 64, 512, 4096, 16384, 65536, 100000]
+    # 10b. Streaming & Block Boundaries
+    print("\n10b. HCA-0.2 Input Length Progression (0 Bytes -> 100,000 Bytes):")
+    large_steps = [0, 64, 512, 4096, 65536, 100000]
     for size in large_steps:
         data = b"\xAA" * size
         h = hca(data, output_bits=512)
         blocks = (size + 1 + 8 + 63) // 64
         print(f"   -> Input: {size:6d} bytes ({size/1024:6.2f} KB) | Absorption Blocks: {blocks:5d} | Digest: {h.hex()[:32]}...")
 
-    # 10c. Stream Cipher Encryption at Maximum Payload
-    print("\n10c. HCA-0.2 Stream Cipher — Max Payload Encryption & Decryption:")
+    # 10c. Stream Cipher Mode
+    print("\n10c. HCA-0.2 Stream Cipher (Basic XOR Mode):")
     key = "UltraSecretMasterKey9999"
-    # Large payload of 10,000 bytes
-    large_plaintext = "CONFIDENTIAL_PAYLOAD_DATA_" * 400  # 10,400 bytes
-    print(f"   Encrypting {len(large_plaintext):,d} byte payload with HCA keystream...")
-    
-    enc = hca_encrypt(large_plaintext, key)
-    nonce_hex, cipher_hex = enc.split(":")
-    print(f"   Nonce:      {nonce_hex}")
-    print(f"   Ciphertext: {cipher_hex[:48]}... ({len(cipher_hex) // 2:,d} bytes)")
+    plaintext = "Stream cipher demonstration message!"
+    enc_stream = hca_encrypt(plaintext, key)
+    dec_stream = hca_decrypt(enc_stream, key)
+    print(f"   Encrypted (<nonce>:<ciphertext>): {enc_stream[:48]}...")
+    print(f"   Decrypted: {dec_stream}")
+    print(f"   Match: {dec_stream == plaintext}")
 
-    dec = hca_decrypt(enc, key)
-    print(f"   Decrypted Match: {dec == large_plaintext} (Length: {len(dec):,d} bytes)")
+    # 10d. AEAD Authenticated Encryption Mode (Option 2)
+    print("\n10d. HCA-0.2 Authenticated Encryption with Associated Data (AEAD Mode):")
+    associated_metadata = "PacketHeader:v2.0,ChannelID:994,UserID:Mukesh"
+    confidential_data = "AUTHENTICATED FINANCIAL OR HIGHLY SENSITIVE TRANSACTION"
 
-    print("\n" + "=" * 75)
-    print("                     MAXIMUM DEMO COMPLETED")
-    print("=" * 75)
+    print(f"   Plaintext: {confidential_data}")
+    print(f"   Associated Data (Unencrypted Header): {associated_metadata}")
+
+    # Encrypt with AEAD
+    aead_payload = hca_aead_encrypt(confidential_data, key, associated_data=associated_metadata)
+    nonce_hex, tag_hex, cipher_hex = aead_payload.split(":")
+    print(f"\n   [+] AEAD Payload: <nonce>:<256-bit tag>:<ciphertext>")
+    print(f"       Nonce:      {nonce_hex}")
+    print(f"       Auth Tag:   {tag_hex}")
+    print(f"       Ciphertext: {cipher_hex}")
+
+    # Legitimate Decryption
+    decrypted_valid = hca_aead_decrypt(aead_payload, key, associated_data=associated_metadata)
+    print(f"\n   [+] Verification & Decryption: SUCCESS")
+    print(f"       Recovered Text: {decrypted_valid}")
+
+    # Tamper Simulation Test
+    print(f"\n   [+] Tamper Attack Simulation:")
+    tampered_payload = f"{nonce_hex}:{tag_hex}:{cipher_hex[:-2]}00"
+    try:
+        hca_aead_decrypt(tampered_payload, key, associated_data=associated_metadata)
+        print("       [!] ERROR: Tamper was NOT caught!")
+    except Exception as e:
+        print(f"       [PASS] ATTACK BLOCKED: {e}")
+
+    # Header Modification Simulation
+    try:
+        hca_aead_decrypt(aead_payload, key, associated_data="PacketHeader:v2.0,ChannelID:666,UserID:Attacker")
+        print("       [!] ERROR: Header forgery was NOT caught!")
+    except Exception as e:
+        print(f"       [PASS] FORGERY BLOCKED: {e}")
+
+    print("\n" + "=" * 80)
+    print("                     ALL DEMOS COMPLETED")
+    print("=" * 80)
 
     # Keep console open if run interactively
     input("\nPress Enter to exit...")

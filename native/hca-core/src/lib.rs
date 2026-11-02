@@ -1,4 +1,5 @@
 pub mod absorb;
+pub mod aead;
 pub mod cipher;
 pub mod constants;
 pub mod hasher;
@@ -10,7 +11,7 @@ pub mod state;
 use hasher::HCAEngine;
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
-use pyo3::types::{PyBytes, PyString};
+use pyo3::types::{PyBytes, PyString, PyTuple};
 
 #[pyclass(name = "HCAHasher", unsendable)]
 pub struct PyHCAHasher {
@@ -97,9 +98,41 @@ pub fn hca_cipher_process<'py>(
     key: &[u8],
     nonce: &[u8],
 ) -> PyResult<Bound<'py, PyBytes>> {
-    let result = cipher::cipher_process(data, key, nonce)
-        .map_err(PyValueError::new_err)?;
+    let result = aead::cipher_process(data, key, nonce).map_err(PyValueError::new_err)?;
     Ok(PyBytes::new(py, &result))
+}
+
+#[pyfunction]
+#[pyo3(signature = (plaintext, key, nonce, associated_data=None))]
+pub fn hca_aead_encrypt<'py>(
+    py: Python<'py>,
+    plaintext: &[u8],
+    key: &[u8],
+    nonce: &[u8],
+    associated_data: Option<&[u8]>,
+) -> PyResult<Bound<'py, PyTuple>> {
+    let ad = associated_data.unwrap_or(b"");
+    let (ciphertext, tag) =
+        aead::aead_encrypt(plaintext, key, nonce, ad).map_err(PyValueError::new_err)?;
+    let py_cipher = PyBytes::new(py, &ciphertext);
+    let py_tag = PyBytes::new(py, &tag);
+    PyTuple::new(py, [py_cipher.as_any(), py_tag.as_any()])
+}
+
+#[pyfunction]
+#[pyo3(signature = (ciphertext, key, nonce, tag, associated_data=None))]
+pub fn hca_aead_decrypt<'py>(
+    py: Python<'py>,
+    ciphertext: &[u8],
+    key: &[u8],
+    nonce: &[u8],
+    tag: &[u8],
+    associated_data: Option<&[u8]>,
+) -> PyResult<Bound<'py, PyBytes>> {
+    let ad = associated_data.unwrap_or(b"");
+    let plaintext =
+        aead::aead_decrypt(ciphertext, key, nonce, ad, tag).map_err(PyValueError::new_err)?;
+    Ok(PyBytes::new(py, &plaintext))
 }
 
 #[pymodule]
@@ -107,6 +140,8 @@ fn _hca_core(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyHCAHasher>()?;
     m.add_function(wrap_pyfunction!(hca, m)?)?;
     m.add_function(wrap_pyfunction!(hca_cipher_process, m)?)?;
+    m.add_function(wrap_pyfunction!(hca_aead_encrypt, m)?)?;
+    m.add_function(wrap_pyfunction!(hca_aead_decrypt, m)?)?;
     Ok(())
 }
 
@@ -120,5 +155,22 @@ mod tests {
         engine.update(b"Hello Hashium").unwrap();
         let d = engine.finalize();
         assert_eq!(d.len(), 64);
+    }
+
+    #[test]
+    fn test_aead_roundtrip() {
+        let key = b"mysecretpasswordkey123";
+        let nonce = b"1234567812345678";
+        let ad = b"header-metadata";
+        let plaintext = b"Hello AEAD Authenticated World!";
+
+        let (cipher, tag) = aead::aead_encrypt(plaintext, key, nonce, ad).unwrap();
+        let decrypted = aead::aead_decrypt(&cipher, key, nonce, ad, &tag).unwrap();
+        assert_eq!(plaintext.to_vec(), decrypted);
+
+        // Tamper test
+        let mut tampered_cipher = cipher.clone();
+        tampered_cipher[0] ^= 0x01;
+        assert!(aead::aead_decrypt(&tampered_cipher, key, nonce, ad, &tag).is_err());
     }
 }
