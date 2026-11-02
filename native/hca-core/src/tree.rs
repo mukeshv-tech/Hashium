@@ -50,6 +50,8 @@ pub fn tree_hash(data: &[u8], output_bits: usize) -> Result<Vec<u8>, String> {
     let mut root_engine = HCAEngine::new(output_bits)?;
     root_engine.update(b"HCAROOT:").unwrap();
     root_engine.update(&current_nodes[0]).unwrap();
-    root_engine.update(&(data.len() as u64).to_be_bytes()).unwrap();
+    root_engine
+        .update(&(data.len() as u64).to_be_bytes())
+        .unwrap();
     Ok(root_engine.finalize())
 }

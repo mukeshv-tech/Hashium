@@ -99,7 +99,8 @@ pub fn hca_parallel<'py>(
     data: &[u8],
     output_bits: usize,
 ) -> PyResult<Bound<'py, PyBytes>> {
-    let result = py.allow_threads(|| tree::tree_hash(data, output_bits))
+    let result = py
+        .allow_threads(|| tree::tree_hash(data, output_bits))
         .map_err(PyValueError::new_err)?;
     Ok(PyBytes::new(py, &result))
 }
@@ -143,8 +144,8 @@ pub fn hca_aead_decrypt<'py>(
     associated_data: Option<&[u8]>,
 ) -> PyResult<Bound<'py, PyBytes>> {
     let ad = associated_data.unwrap_or(b"");
-    let plaintext = aead::aead_decrypt(ciphertext, key, nonce, ad, tag)
-        .map_err(PyValueError::new_err)?;
+    let plaintext =
+        aead::aead_decrypt(ciphertext, key, nonce, ad, tag).map_err(PyValueError::new_err)?;
     Ok(PyBytes::new(py, &plaintext))
 }
 
