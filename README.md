@@ -183,6 +183,37 @@ print(hashium.hashium_ultra_secure("mypassword"))
 
 ---
 
+## Experimental: HCA-0.1 (Hashium Custom Algorithm)
+
+HCA-0.1 is an experimental, variable-output-length sponge hashing construction with a native Rust core and PyO3 bindings.
+
+> [!WARNING]
+> **Experimental Primitive**: HCA-0.1 is under active research and has not undergone peer-reviewed cryptanalysis. It must never be used for passwords, authentication, digital signatures, encryption, or security-critical applications.
+
+### Usage:
+
+```python
+from hashium.experimental.hca import HCAHasher, hca
+
+# One-shot hashing with custom output bit length (128 - 4096 bits)
+digest = hca(b"Hello Hashium", output_bits=512)
+
+# Incremental streaming
+hasher = HCAHasher(output_bits=256)
+hasher.update(b"Hello ")
+hasher.update(b"Hashium")
+
+result = hasher.hexdigest()
+print(result)
+```
+
+For complete mathematical definitions and design notes, see:
+- [Specification](docs/hca/specification.md)
+- [Design Notes](docs/hca/design-notes.md)
+- [Security Considerations](docs/hca/security-considerations.md)
+
+---
+
 ## Example Script
 
 See `example.py` in the repository to test all functionalities.

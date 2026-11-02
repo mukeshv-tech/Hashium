@@ -1,0 +1,33 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "hashium"
+version = "1.0.0"
+description = "Hashium: An advanced cryptography toolkit for secure hashing, encryption, digital signatures, and experimental HCA-0.1 hashing."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Prog. Kanishk Raj" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Security :: Cryptography"
+]
+dependencies = [
+    "pycryptodome",
+    "argon2-cffi"
+]
+
+[project.scripts]
+hashium = "hashium.cli:main"
+
+[tool.maturin]
+manifest-path = "native/hca-core/Cargo.toml"
+python-packages = ["hashium"]
+module-name = "hashium._hca_core"
+features = ["pyo3/extension-module"]
