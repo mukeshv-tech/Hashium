@@ -55,6 +55,19 @@ def test_aes256_encryption_decryption(h):
     decrypted = h.decrypt_data(encrypted)
     assert decrypted == secret
 
+    # Test with custom key
+    custom_key = "my_custom_secret_passphrase_321"
+    h_custom = Hashium(aes_key=custom_key)
+    enc_custom = h_custom.encrypt_data(secret)
+    dec_custom = h_custom.decrypt_data(enc_custom)
+    assert dec_custom == secret
+
+    # Test explicit per-call key parameter
+    explicit_key = os.urandom(32)
+    enc_explicit = h.encrypt_data(secret, key=explicit_key)
+    dec_explicit = h.decrypt_data(enc_explicit, key=explicit_key)
+    assert dec_explicit == secret
+
 
 def test_rsa_keygen_sign_verify(h):
     priv, pub = h.generate_rsa_keys(key_size=2048)

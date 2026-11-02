@@ -34,8 +34,28 @@ def cmd_hash(args):
         if not os.path.exists(args.file):
             print(f"Error: File not found: '{args.file}'", file=sys.stderr)
             sys.exit(1)
-        with open(args.file, "rb") as f:
-            data = f.read()
+        if args.algo == "hca":
+            if args.salted:
+                # Read file for salted hashing
+                with open(args.file, "rb") as f:
+                    data = f.read()
+                print(hca_salted(data, output_bits=args.bits))
+            else:
+                hasher = HCAHasher(output_bits=args.bits)
+                with open(args.file, "rb") as f:
+                    while chunk := f.read(65536):
+                        hasher.update(chunk)
+                print(hasher.hexdigest())
+            return
+        elif args.algo == "sha256":
+            h = Hashium()
+            if args.salted:
+                with open(args.file, "rb") as f:
+                    data = f.read()
+                print(h.hashium_salted(data.decode("utf-8", errors="replace")))
+            else:
+                print(h.hash_file(args.file))
+            return
     elif args.text is not None:
         data = args.text.encode("utf-8")
     else:
@@ -124,13 +144,17 @@ def cmd_decrypt(args):
             import getpass
             try:
                 key = getpass.getpass("Enter secret key: ").strip()
-            except Exception:
-                key = input("Enter secret key: ").strip()
+            except (EOFError, KeyboardInterrupt):
+                print("\nAborted.", file=sys.stderr)
+                sys.exit(1)
+            except Exception as e:
+                print(f"Error reading key: {e}", file=sys.stderr)
+                sys.exit(1)
         else:
             try:
-                key = input().strip()
-            except Exception:
-                pass
+                key = sys.stdin.readline().strip()
+            except (EOFError, KeyboardInterrupt):
+                key = ""
 
     if not key:
         print("Error: Secret key cannot be empty.", file=sys.stderr)

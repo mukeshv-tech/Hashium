@@ -3,18 +3,29 @@ import hashlib
 import hmac
 import base64
 from argon2 import PasswordHasher, exceptions as argon2_exceptions
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
-from Crypto.Util.Padding import pad, unpad
-from Crypto.PublicKey import RSA
-from Crypto.Signature import pkcs1_15
-from Crypto.Hash import SHA256
+from Crypto.Cipher import AES  # nosec B413 (pycryptodome 4.2.0, not legacy pycrypto)
+from Crypto.Random import get_random_bytes  # nosec B413
+from Crypto.Util.Padding import pad, unpad  # nosec B413
+from Crypto.PublicKey import RSA  # nosec B413
+from Crypto.Signature import pkcs1_15  # nosec B413
+from Crypto.Hash import SHA256  # nosec B413
+from typing import Optional, Union, Tuple
 
 
 class Hashium:
-    def __init__(self):
+    def __init__(self, aes_key: Optional[Union[str, bytes]] = None):
         self.ph = PasswordHasher()
-        self.aes_key = get_random_bytes(32)  # 256-bit AES key
+        if aes_key is None:
+            self.aes_key = get_random_bytes(32)  # 256-bit AES key default
+        elif isinstance(aes_key, str):
+            if len(aes_key) == 64 and all(c in "0123456789abcdefABCDEF" for c in aes_key):
+                self.aes_key = bytes.fromhex(aes_key)
+            else:
+                self.aes_key = hashlib.sha256(aes_key.encode("utf-8")).digest()
+        else:
+            self.aes_key = bytes(aes_key)
+            if len(self.aes_key) not in (16, 24, 32):
+                raise ValueError("AES key must be 16, 24, or 32 bytes (128, 192, or 256 bits)")
 
     # Basic SHA-256 Hash
     def hashium_basic(self, data: str) -> str:
@@ -54,19 +65,31 @@ class Hashium:
             return False
 
     # AES-256 Encryption (EAX Mode)
-    def encrypt_data(self, data: str) -> str:
-        cipher = AES.new(self.aes_key, AES.MODE_EAX)
+    def encrypt_data(self, data: str, key: Optional[Union[str, bytes]] = None) -> str:
+        active_key = self._resolve_key(key) if key is not None else self.aes_key
+        cipher = AES.new(active_key, AES.MODE_EAX)
         ciphertext, tag = cipher.encrypt_and_digest(data.encode())
         return f"{cipher.nonce.hex()}:{tag.hex()}:{ciphertext.hex()}"
 
-    def decrypt_data(self, encrypted_str: str) -> str:
+    def decrypt_data(self, encrypted_str: str, key: Optional[Union[str, bytes]] = None) -> str:
+        active_key = self._resolve_key(key) if key is not None else self.aes_key
         nonce_hex, tag_hex, ciphertext_hex = encrypted_str.split(":")
         nonce = bytes.fromhex(nonce_hex)
         tag = bytes.fromhex(tag_hex)
         ciphertext = bytes.fromhex(ciphertext_hex)
-        cipher = AES.new(self.aes_key, AES.MODE_EAX, nonce=nonce)
+        cipher = AES.new(active_key, AES.MODE_EAX, nonce=nonce)
         decrypted = cipher.decrypt_and_verify(ciphertext, tag)
         return decrypted.decode()
+
+    def _resolve_key(self, key: Union[str, bytes]) -> bytes:
+        if isinstance(key, str):
+            if len(key) == 64 and all(c in "0123456789abcdefABCDEF" for c in key):
+                return bytes.fromhex(key)
+            return hashlib.sha256(key.encode("utf-8")).digest()
+        key_bytes = bytes(key)
+        if len(key_bytes) not in (16, 24, 32):
+            raise ValueError("AES key must be 16, 24, or 32 bytes (128, 192, or 256 bits)")
+        return key_bytes
 
     # File Hashing
     def hash_file(self, file_path: str) -> str:
