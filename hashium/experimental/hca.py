@@ -31,6 +31,21 @@ def hca(data: Union[bytes, bytearray, memoryview], output_bits: int = 512) -> by
     return _hca_core.hca(data, output_bits)
 
 
+def hca_parallel(data: Union[bytes, bytearray, memoryview], output_bits: int = 512) -> bytes:
+    """
+    Compute HCA tree hash utilizing multi-core parallel processing (via Rayon).
+    Releases the Python GIL during parallel tree execution.
+
+    Parameters:
+        data: bytes-like object to hash.
+        output_bits: length of output digest in bits (128 to 4096, multiple of 8).
+
+    Returns:
+        Digest bytes.
+    """
+    return _hca_core.hca_parallel(data, output_bits)
+
+
 def hca_salted(
     data: Union[str, bytes],
     salt: Optional[Union[str, bytes]] = None,
@@ -215,6 +230,7 @@ def hca_aead_decrypt(
 __all__ = [
     "HCAHasher",
     "hca",
+    "hca_parallel",
     "hca_salted",
     "hca_verify_salted",
     "hca_encrypt",
