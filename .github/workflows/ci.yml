@@ -57,8 +57,8 @@ jobs:
 
       - name: Build and Install Wheel
         run: |
-          maturin build --release --manifest-path native/hca-core/Cargo.toml
-          python -m pip install native/hca-core/target/wheels/*
+          maturin build --release --manifest-path native/hca-core/Cargo.toml --out dist
+          pip install --find-links=dist hca-core
 
       - name: Run Test Suites
         run: |
