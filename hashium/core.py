@@ -135,6 +135,84 @@ class Hashium:
         final_hash = hashlib.sha512((argon_hash + intermediate_hex).encode()).hexdigest()
         return f"{salt.hex()}:{final_hash}"
 
+    # Key Derivation Methods (HKDF, Scrypt, HMAC-HCA)
+    def hkdf(
+        self,
+        ikm: Union[str, bytes],
+        length: int = 32,
+        salt: Optional[Union[str, bytes]] = None,
+        info: Union[str, bytes] = b"",
+        hash_name: str = "sha256",
+    ) -> bytes:
+        from hashium.kdf import hkdf
+        return hkdf(ikm, length=length, salt=salt, info=info, hash_name=hash_name)
+
+    def scrypt(
+        self,
+        password: Union[str, bytes],
+        salt: Optional[Union[str, bytes]] = None,
+        length: int = 32,
+        n: int = 16384,
+        r: int = 8,
+        p: int = 1,
+    ) -> bytes:
+        from hashium.kdf import scrypt_kdf
+        return scrypt_kdf(password, salt=salt, length=length, n=n, r=r, p=p)
+
+    def hmac_hca(self, key: Union[str, bytes], data: Union[str, bytes], output_bits: int = 256) -> bytes:
+        from hashium.kdf import hmac_hca
+        return hmac_hca(key, data, output_bits=output_bits)
+
+    # Modern AEAD Ciphers (ChaCha20-Poly1305, AES-GCM)
+    def chacha20_poly1305_encrypt(
+        self,
+        plaintext: Union[str, bytes],
+        key: Union[str, bytes],
+        nonce: Optional[bytes] = None,
+        associated_data: Optional[Union[str, bytes]] = None,
+    ) -> Tuple[bytes, bytes, bytes]:
+        from hashium.ciphers import chacha20_poly1305_encrypt
+        return chacha20_poly1305_encrypt(plaintext, key, nonce=nonce, associated_data=associated_data)
+
+    def chacha20_poly1305_decrypt(
+        self,
+        ciphertext: bytes,
+        key: Union[str, bytes],
+        nonce: bytes,
+        tag: bytes,
+        associated_data: Optional[Union[str, bytes]] = None,
+    ) -> bytes:
+        from hashium.ciphers import chacha20_poly1305_decrypt
+        return chacha20_poly1305_decrypt(ciphertext, key, nonce, tag, associated_data=associated_data)
+
+    def aes_gcm_encrypt(
+        self,
+        plaintext: Union[str, bytes],
+        key: Optional[Union[str, bytes]] = None,
+        nonce: Optional[bytes] = None,
+        associated_data: Optional[Union[str, bytes]] = None,
+    ) -> Tuple[bytes, bytes, bytes]:
+        from hashium.ciphers import aes_gcm_encrypt
+        active_key = self._resolve_key(key) if key is not None else self.aes_key
+        return aes_gcm_encrypt(plaintext, active_key, nonce=nonce, associated_data=associated_data)
+
+    def aes_gcm_decrypt(
+        self,
+        ciphertext: bytes,
+        key: Optional[Union[str, bytes]] = None,
+        nonce: bytes = b"",
+        tag: bytes = b"",
+        associated_data: Optional[Union[str, bytes]] = None,
+    ) -> bytes:
+        from hashium.ciphers import aes_gcm_decrypt
+        active_key = self._resolve_key(key) if key is not None else self.aes_key
+        return aes_gcm_decrypt(ciphertext, active_key, nonce, tag, associated_data=associated_data)
+
+    # File Shredding Utility
+    def shred_file(self, file_path: str, passes: int = 3, method: str = "dod") -> bool:
+        from hashium.shredder import shred_file
+        return shred_file(file_path, passes=passes, method=method)
+
 
 # Example Usage
 if __name__ == "__main__":
